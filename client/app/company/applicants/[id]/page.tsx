@@ -46,7 +46,6 @@ export default function CompanyApplicantsPage() {
   const internshipId = Number(params?.id);
 
   const [manualSelectedId, setManualSelectedId] = useState<number | null>(null);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const applicantsQuery = useQuery({
     queryKey: ['company-applicants', internshipId],
@@ -100,8 +99,6 @@ export default function CompanyApplicantsPage() {
   };
 
   const handleResumeDownload = async (detail: ApplicationDetail) => {
-    setDownloadError(null);
-
     try {
       const { blob, filename } = await applicationService.downloadResume(detail.id);
       const blobUrl = URL.createObjectURL(blob);

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
-import certificateService, { Certificate } from '@/services/certificate.service';
+import certificateService from '@/services/certificate.service';
 import type { Application } from '@/services/application.service';
 import { useQuery } from '@tanstack/react-query';
 import { showError } from '@/lib/toast';
@@ -66,7 +66,7 @@ export default function ApplicationList({
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       showError('Failed to download certificate');
     }
   };

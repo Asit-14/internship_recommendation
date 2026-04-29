@@ -1,12 +1,14 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import { useAuth } from '@/hooks/useAuth';
+import applicationService from '@/services/application.service';
 import RecommendationForm, {
   type RecommendationFormData,
 } from '@/features/recommendation/RecommendationForm';
@@ -45,8 +47,20 @@ const highlights = [
 ];
 
 export default function HomePage() {
+  const { role, isAuthenticated } = useAuth();
+  const isStudent = isAuthenticated && role === 'student';
   const [results, setResults] = useState<Recommendation[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+
+  const applicationsQuery = useQuery({
+    queryKey: ['my-applications'],
+    queryFn: () => applicationService.getMyApplications(),
+    enabled: isStudent,
+  });
+
+  const appliedIds = useMemo(() => {
+    return new Set(applicationsQuery.data?.map((app) => app.internship_id) ?? []);
+  }, [applicationsQuery.data]);
 
   const mutation = useMutation({
     mutationFn: (data: RecommendationFormData) => recommendationService.analyzeResume(data.file),
@@ -108,6 +122,7 @@ export default function HomePage() {
           {(hasSearched || mutation.isPending) && (
             <RecommendationList
               recommendations={results}
+              appliedIds={appliedIds}
               isLoading={mutation.isPending}
               error={errorMessage}
             />

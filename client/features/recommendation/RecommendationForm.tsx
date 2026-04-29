@@ -27,8 +27,9 @@ export default function RecommendationForm({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null;
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0] ?? null;
 
     if (!file) {
       setSelectedFile(null);

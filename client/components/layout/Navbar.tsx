@@ -17,7 +17,10 @@ export default function Navbar() {
   const isLoggedIn = isAuthenticated;
 
   useEffect(() => {
-    setIsMounted(true);
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const navLinks = (() => {

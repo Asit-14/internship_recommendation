@@ -7,21 +7,31 @@ export const showSuccess = (message: string) =>
     className: `${baseClassName} border-[#478356] text-[#478356]`,
   });
 
-export const showError = (message: any) => {
+export const showError = (message: unknown) => {
   let displayMessage = 'An error occurred';
+  const msg = message as Record<string, unknown>;
 
   if (typeof message === 'string') {
     displayMessage = message;
-  } else if (message?.detail) {
-    if (typeof message.detail === 'string') {
-      displayMessage = message.detail;
-    } else if (Array.isArray(message.detail)) {
-      displayMessage = message.detail[0]?.msg || JSON.stringify(message.detail[0]);
+  } else if (msg && typeof msg === 'object') {
+    if (msg.detail) {
+      if (typeof msg.detail === 'string') {
+        displayMessage = msg.detail;
+      } else if (Array.isArray(msg.detail)) {
+        const firstDetail = msg.detail[0];
+        if (firstDetail && typeof firstDetail === 'object') {
+          displayMessage = (firstDetail as any).msg || JSON.stringify(firstDetail);
+        } else {
+          displayMessage = String(firstDetail);
+        }
+      }
+    } else if (typeof msg.msg === 'string') {
+      displayMessage = msg.msg;
+    } else if (typeof msg.message === 'string') {
+      displayMessage = msg.message;
+    } else if (msg.message || msg.msg) {
+      displayMessage = String(msg.message || msg.msg);
     }
-  } else if (message?.msg) {
-    displayMessage = message.msg;
-  } else if (typeof message === 'object') {
-    displayMessage = message.message || JSON.stringify(message);
   }
 
   return toast.error(displayMessage, {

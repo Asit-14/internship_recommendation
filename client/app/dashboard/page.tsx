@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import Link from 'next/link';
 
 import AuthGuard from '@/components/auth/AuthGuard';
@@ -33,6 +34,7 @@ const studentActions = [
 
 export default function DashboardPage() {
   const { role } = useAuth();
+  const queryClient = useQueryClient();
   const profileQuery = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => userService.getProfile(),
@@ -60,24 +62,19 @@ export default function DashboardPage() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       showError('Failed to download certificate');
     }
   };
 
   const displayName = profileQuery.data?.name || 'Student';
   const roleLabel = role ?? profileQuery.data?.role ?? 'student';
-  const quickActions = studentActions;
 
   const roleBadge = (
     <span className="inline-flex items-center rounded-full border border-gray-200 bg-[#f5f7fa] px-2.5 py-0.5 text-xs font-semibold text-gray-600">
       {roleLabel}
     </span>
   );
-  const headerDescription =
-    role === 'company'
-      ? 'Track approvals and manage your internship postings.'
-      : 'Review your applications and keep your profile up to date.';
 
   const applications = applicationsQuery.data ?? [];
   const recentApplications = applications.slice(0, 3);
@@ -161,9 +158,9 @@ export default function DashboardPage() {
                                   await certificateService.generateMissing(app.id);
                                   await queryClient.invalidateQueries({ queryKey: ['my-certificates'] });
                                   await queryClient.invalidateQueries({ queryKey: ['my-applications'] });
-                                } catch (e: any) {
+                                } catch (e: unknown) {
                                   // If it already exists, just refresh the queries
-                                  if (e.response?.status === 409) {
+                                  if (e instanceof AxiosError && e.response?.status === 409) {
                                     queryClient.invalidateQueries({ queryKey: ['my-certificates'] });
                                   } else {
                                     showError('Failed to sync certificate');

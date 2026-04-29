@@ -7,6 +7,9 @@ import { FormEvent, useMemo, useState } from 'react';
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import PageHeader from '@/components/layout/PageHeader';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import Spinner from '@/components/ui/Spinner';
 import internshipService, {
   type CreateInternshipPayload,
@@ -54,6 +57,7 @@ const toFormState = (internship: Internship): InternshipFormState => ({
 });
 
 export default function CompanyEditInternshipPage() {
+  const params = useParams();
   const internshipId = Number(params?.id);
 
   const [draftFormState, setDraftFormState] = useState<{

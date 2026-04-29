@@ -3,9 +3,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
+import Button from '@/components/ui/Button';
 import applicationService from '@/services/application.service';
 import type { Recommendation } from '@/services/recommendation.service';
 import { showError, showSuccess } from '@/lib/toast';

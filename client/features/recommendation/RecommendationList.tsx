@@ -5,6 +5,7 @@ import RecommendationCard from './components/RecommendationCard';
 
 type RecommendationListProps = {
   recommendations: Recommendation[];
+  appliedIds?: Set<number>;
   isLoading?: boolean;
   error?: string | null;
 };
@@ -44,6 +45,7 @@ function ErrorMessage({ message }: { message: string }) {
 
 export default function RecommendationList({
   recommendations,
+  appliedIds = new Set(),
   isLoading = false,
   error = null,
 }: RecommendationListProps) {
@@ -69,7 +71,11 @@ export default function RecommendationList({
       </div>
 
       {recommendations.map((rec) => (
-        <RecommendationCard key={rec.internship_id} recommendation={rec} />
+        <RecommendationCard 
+          key={rec.internship_id} 
+          recommendation={rec} 
+          appliedIds={appliedIds}
+        />
       ))}
     </div>
   );

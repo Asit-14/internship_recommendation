@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react';
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import PageHeader from '@/components/layout/PageHeader';
-import Card from '@/components/ui/Card';
 import InternshipList from '@/features/internship/InternshipList';
 import applicationService, { type Application } from '@/services/application.service';
 import internshipService from '@/services/internship.service';

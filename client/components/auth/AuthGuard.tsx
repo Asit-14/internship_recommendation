@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { type AuthRole, useAuth } from '@/hooks/useAuth';
 
@@ -25,6 +25,14 @@ export default function AuthGuard({
   const { isAuthenticated, role } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const guardStatus = useMemo<GuardStatus>(() => {
     const hasSession = isAuthenticated;
@@ -53,7 +61,7 @@ export default function AuthGuard({
     }
   }, [guardStatus, pathname, redirectTo, router, unauthorizedRedirectTo]);
 
-  if (guardStatus !== 'authorized') {
+  if (!mounted || guardStatus !== 'authorized') {
     return (
       fallback ?? (
         <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa] text-gray-800">

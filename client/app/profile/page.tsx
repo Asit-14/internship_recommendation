@@ -422,7 +422,10 @@ export default function ProfilePage() {
                   label="Resume file"
                   type="file"
                   accept=".pdf,.docx"
-                  onChange={(event) => setResumeFile(event.target.files?.[0] ?? null)}
+                  onChange={(event) => {
+                    const target = event.target as HTMLInputElement;
+                    setResumeFile(target.files?.[0] ?? null);
+                  }}
                 />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs text-gray-500">
