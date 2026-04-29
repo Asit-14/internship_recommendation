@@ -1,0 +1,89 @@
+from sqlalchemy.orm import Session
+
+from models.user_model import User, UserRole
+
+
+class UserRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_by_email(self, email: str) -> User | None:
+        return self.db.query(User).filter(User.email == email).one_or_none()
+
+    def get_by_id(self, user_id: int) -> User | None:
+        return self.db.query(User).filter(User.id == user_id).one_or_none()
+
+    def list_non_admin(self) -> list[User]:
+        return (
+            self.db.query(User)
+            .filter(User.role != UserRole.admin)
+            .order_by(User.created_at.desc())
+            .all()
+        )
+
+    def list_by_role(self, role: UserRole) -> list[User]:
+        return (
+            self.db.query(User)
+            .filter(User.role == role)
+            .order_by(User.created_at.desc())
+            .all()
+        )
+
+    def create(
+        self,
+        *,
+        name: str,
+        email: str,
+        password_hash: str,
+        role: UserRole,
+        is_verified: bool,
+    ) -> User:
+        user = User(
+            name=name,
+            email=email,
+            password_hash=password_hash,
+            role=role,
+            is_verified=is_verified,
+        )
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def set_verified(self, user: User, *, is_verified: bool) -> User:
+        user.is_verified = is_verified
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def set_role(
+        self,
+        user: User,
+        *,
+        role: UserRole,
+        is_verified: bool | None = None,
+    ) -> User:
+        user.role = role
+        if is_verified is not None:
+            user.is_verified = is_verified
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def update_profile(self, user: User, *, updates: dict) -> User:
+        for field, value in updates.items():
+            setattr(user, field, value)
+
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def set_resume_filename(self, user: User, *, resume_filename: str) -> User:
+        user.resume_filename = resume_filename
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def delete(self, user: User) -> None:
+        self.db.delete(user)
+        self.db.commit()

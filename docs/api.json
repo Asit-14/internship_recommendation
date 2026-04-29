@@ -1,0 +1,368 @@
+{
+  "title": "InternshipT API",
+  "version": "1.0",
+  "basePath": "/api/v1",
+  "modules": [
+    {
+      "name": "Authentication",
+      "tag": "Authentication",
+      "endpoints": [
+        {
+          "path": "/auth/signup",
+          "method": "POST",
+          "description": "Create student user",
+          "request": "SignupRequest",
+          "response": "UserResponse",
+          "auth_required": false,
+          "status_codes": [201, 409]
+        },
+        {
+          "path": "/auth/register-company",
+          "method": "POST",
+          "description": "Register a company account",
+          "request": "CompanySignupRequest",
+          "response": "UserResponse",
+          "auth_required": false,
+          "status_codes": [201, 409]
+        },
+        {
+          "path": "/auth/login",
+          "method": "POST",
+          "description": "Login and receive JWT token",
+          "request": "LoginRequest",
+          "response": "TokenResponse",
+          "auth_required": false,
+          "status_codes": [200, 401]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "tag": "Users",
+      "endpoints": [
+        {
+          "path": "/users/profile",
+          "method": "GET",
+          "description": "Get current user's profile",
+          "response": "UserProfileResponse",
+          "auth_required": true
+        },
+        {
+          "path": "/users/profile",
+          "method": "PUT",
+          "description": "Update current user's profile",
+          "request": "UserProfileUpdateRequest",
+          "response": "UserProfileResponse",
+          "auth_required": true
+        },
+        {
+          "path": "/users/upload-resume",
+          "method": "POST",
+          "description": "Upload resume file (multipart)",
+          "request": "file: UploadFile",
+          "response": "ResumeUploadResponse",
+          "auth_required": true
+        }
+      ]
+    },
+    {
+      "name": "Internships",
+      "tag": "Internships",
+      "endpoints": [
+        {
+          "path": "/internships/",
+          "method": "GET",
+          "description": "Search & list active internships (query filters: location, skills, sector, stipend_min, stipend_max, duration_min, duration_max, user_skills)",
+          "response": "List[InternshipResponse]",
+          "auth_required": false
+        },
+        {
+          "path": "/internships/{id}",
+          "method": "GET",
+          "description": "Get internship by id",
+          "response": "InternshipResponse",
+          "auth_required": false
+        },
+        {
+          "path": "/internships/",
+          "method": "POST",
+          "description": "Create internship (company only)",
+          "request": "CompanyInternshipCreate",
+          "response": "InternshipResponse",
+          "auth_required": true,
+          "roles": ["company"]
+        },
+        {
+          "path": "/internships/{id}",
+          "method": "DELETE",
+          "description": "Delete internship (company only)",
+          "auth_required": true,
+          "roles": ["company"],
+          "status_codes": [204, 403, 404]
+        },
+        {
+          "path": "/internships/{id}",
+          "method": "PUT/PATCH",
+          "description": "Update internship (company/admin)",
+          "request": "InternshipUpdate",
+          "response": "InternshipResponse",
+          "auth_required": true,
+          "roles": ["company", "admin"]
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "tag": "Applications",
+      "endpoints": [
+        {
+          "path": "/applications/",
+          "method": "POST",
+          "description": "Apply to internship (student)",
+          "request": "ApplicationCreateRequest",
+          "response": "ApplicationResponse",
+          "auth_required": true,
+          "roles": ["student"]
+        },
+        {
+          "path": "/applications/my",
+          "method": "GET",
+          "description": "Get current student's applications",
+          "response": "List[ApplicationResponse]",
+          "auth_required": true,
+          "roles": ["student"]
+        },
+        {
+          "path": "/applications/{id}",
+          "method": "GET",
+          "description": "Get application details (owner/company/admin)",
+          "response": "ApplicationDetailResponse",
+          "auth_required": true
+        },
+        {
+          "path": "/applications/{id}/status",
+          "method": "PATCH",
+          "description": "Update application status (company/admin)",
+          "request": "ApplicationStatusUpdateRequest",
+          "response": "ApplicationResponse",
+          "auth_required": true,
+          "roles": ["company", "admin"]
+        },
+        {
+          "path": "/applications/{id}/resume",
+          "method": "GET",
+          "description": "Download the submitted resume file",
+          "response": "FileResponse",
+          "auth_required": true
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "tag": "Recommendations",
+      "endpoints": [
+        {
+          "path": "/recommendations/",
+          "method": "POST",
+          "description": "Get internship recommendations for provided skills/profile",
+          "request": "RecommendationRequest",
+          "response": "RecommendationResponse",
+          "auth_required": false
+        }
+      ]
+    },
+    {
+      "name": "Resume Analyzer",
+      "tag": "Resume",
+      "endpoints": [
+        {
+          "path": "/resume/analyze",
+          "method": "POST",
+          "description": "Analyze uploaded resume and return recommendations (multipart file)",
+          "request": "file: UploadFile",
+          "response": "List[ResumeRecommendationItem]",
+          "auth_required": false
+        }
+      ]
+    },
+    {
+      "name": "Company",
+      "tag": "Company",
+      "endpoints": [
+        {
+          "path": "/company/internships",
+          "method": "GET",
+          "description": "Get internships created by current company",
+          "response": "List[InternshipResponse]",
+          "auth_required": true,
+          "roles": ["company"]
+        },
+        {
+          "path": "/company/internships/{id}/applicants",
+          "method": "GET",
+          "description": "Get applicants for a company internship",
+          "response": "List[ApplicantSummaryResponse]",
+          "auth_required": true,
+          "roles": ["company", "admin"]
+        }
+      ]
+    },
+    {
+      "name": "Certificates",
+      "tag": "Certificates",
+      "endpoints": [
+        {
+          "path": "/certificate/generate",
+          "method": "POST",
+          "description": "Generate a certificate (admin)",
+          "request": "CertificateGenerateRequest",
+          "response": "CertificateResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/certificate/{id}",
+          "method": "GET",
+          "description": "Download certificate PDF",
+          "response": "FileResponse",
+          "auth_required": true
+        }
+      ]
+    },
+    {
+      "name": "Internship Progress",
+      "tag": "Internship Progress",
+      "endpoints": [
+        {
+          "path": "/progress/",
+          "method": "POST",
+          "description": "Add progress entry for an application",
+          "request": "ProgressCreate",
+          "response": "ProgressResponse",
+          "auth_required": true
+        },
+        {
+          "path": "/progress/{application_id}",
+          "method": "GET",
+          "description": "Get progress logs for an application",
+          "response": "List[ProgressResponse]",
+          "auth_required": true
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "tag": "Analytics",
+      "endpoints": [
+        {
+          "path": "/analytics/dashboard",
+          "method": "GET",
+          "description": "Dashboard analytics (admin)",
+          "response": "DashboardAnalyticsResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/analytics/users",
+          "method": "GET",
+          "description": "Users analytics (admin)",
+          "response": "UsersAnalyticsResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/analytics/internships",
+          "method": "GET",
+          "description": "Internships analytics (admin)",
+          "response": "InternshipsAnalyticsResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/analytics/applications",
+          "method": "GET",
+          "description": "Applications analytics (admin)",
+          "response": "ApplicationsAnalyticsResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "tag": "Admin",
+      "endpoints": [
+        {
+          "path": "/admin/users",
+          "method": "GET",
+          "description": "List users (admin)",
+          "response": "List[UserResponse]",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/companies",
+          "method": "GET",
+          "description": "List companies (admin)",
+          "response": "List[UserResponse]",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/company/{id}",
+          "method": "GET",
+          "description": "Get company detail (admin)",
+          "response": "AdminCompanyDetailResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/company/{id}/approve",
+          "method": "PATCH",
+          "description": "Approve a company (admin)",
+          "response": "UserResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/users/{id}/approve",
+          "method": "PATCH",
+          "description": "Approve user/company (admin)",
+          "response": "UserResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/users/{id}",
+          "method": "DELETE",
+          "description": "Delete user (admin)",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/internships",
+          "method": "GET",
+          "description": "List all internships (admin)",
+          "response": "List[InternshipResponse]",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/internships/{id}",
+          "method": "DELETE",
+          "description": "Delete internship (admin)",
+          "auth_required": true,
+          "roles": ["admin"]
+        },
+        {
+          "path": "/admin/analytics/overview",
+          "method": "GET",
+          "description": "Admin overview analytics (admin)",
+          "response": "AdminOverviewResponse",
+          "auth_required": true,
+          "roles": ["admin"]
+        }
+      ]
+    }
+  ]
+}
