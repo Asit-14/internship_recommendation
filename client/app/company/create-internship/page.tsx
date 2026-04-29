@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
 import internshipService, { type CreateInternshipPayload } from '@/services/internship.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const fieldClassName =
   'w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-800 shadow-sm outline-none transition-all duration-200 placeholder:text-gray-400 focus:border-[#11486b] focus:ring-2 focus:ring-[#11486b]/20 disabled:cursor-not-allowed disabled:opacity-60';
@@ -29,8 +30,6 @@ export default function CompanyCreateInternshipPage() {
   const [location, setLocation] = useState('');
   const [duration, setDuration] = useState('');
   const [stipend, setStipend] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const isPendingApproval = isVerified === false;
 
@@ -43,16 +42,14 @@ export default function CompanyCreateInternshipPage() {
       setLocation('');
       setDuration('');
       setStipend('');
-      setError(null);
-      setSuccess('Internship created successfully.');
+      showSuccess('Internship created successfully.');
     },
     onError: (err: unknown) => {
-      setSuccess(null);
       if (err instanceof AxiosError) {
         const detail = err.response?.data?.detail;
-        setError(typeof detail === 'string' ? detail : 'Failed to create internship.');
+        showError(typeof detail === 'string' ? detail : 'Failed to create internship.');
       } else {
-        setError('Failed to create internship.');
+        showError('Failed to create internship.');
       }
     },
   });
@@ -69,11 +66,8 @@ export default function CompanyCreateInternshipPage() {
       return;
     }
 
-    setError(null);
-    setSuccess(null);
-
     if (!skills.length) {
-      setError('Please add at least one skill.');
+      showError('Please add at least one skill.');
       return;
     }
 
@@ -81,12 +75,12 @@ export default function CompanyCreateInternshipPage() {
     const stipendValue = Number(stipend);
 
     if (!Number.isFinite(durationValue) || durationValue <= 0) {
-      setError('Duration must be a positive number of weeks.');
+      showError('Duration must be a positive number of weeks.');
       return;
     }
 
     if (!Number.isFinite(stipendValue) || stipendValue < 0) {
-      setError('Stipend must be zero or a positive number.');
+      showError('Stipend must be zero or a positive number.');
       return;
     }
 
@@ -209,18 +203,6 @@ export default function CompanyCreateInternshipPage() {
                 />
               </div>
             </div>
-
-            {error && (
-              <div className="rounded-md border border-[#ac2b49] bg-white px-3 py-2">
-                <p className="text-sm font-medium text-[#ac2b49]">{error}</p>
-              </div>
-            )}
-
-            {success && (
-              <div className="rounded-md border border-[#478356] bg-white px-3 py-2">
-                <p className="text-sm font-medium text-[#478356]">{success}</p>
-              </div>
-            )}
 
             <Button
               type="submit"

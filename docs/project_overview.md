@@ -1,57 +1,97 @@
-# InternshipT — Project Overview
+# Internship Platform - Project Overview
 
-## Summary
+## 1. PROJECT OVERVIEW
 
-- Title: InternshipT
-- Stack: FastAPI (backend), Next.js + React + TypeScript (frontend), PostgreSQL/SQLite (DB), Pydantic schemas, SQLAlchemy ORM.
-- Auth: JWT-based; role claims include `student`, `company`, `admin`.
+The Internship Platform is an AI-powered comprehensive internship recommendation and management system. It serves as a centralized hub connecting students with companies, streamlining the entire internship lifecycle from posting opportunities to applicant tracking. 
 
-## How to run (backend)
+The platform leverages AI to analyze student resumes, extract core skills, and provide highly accurate internship recommendations using a match scoring system.
 
-- Create a virtualenv and install dependencies from `backned/requirements.txt`.
-- Set environment variables (see `.env`).
-- Start server: `uvicorn core.main:app --reload` or run `python run.py`.
+---
 
-## API Base
+## 2. TECH STACK
 
-- Base prefix used in routers: `/api/v1` (see `core.config.settings.api_v1_prefix`).
-- Auth: token-based via `Authorization: Bearer <token>` header.
+**Frontend:**
+* **Next.js 15**: React framework for server-side rendering and static generation.
+* **TypeScript**: For robust type-safe code across the entire application.
+* **Tailwind CSS**: Utility-first CSS framework for rapid and responsive UI development.
+* **TanStack Query**: Powerful asynchronous state management and data fetching.
+* **Lucide React**: Crisp iconography for the user interface.
 
-## Major Modules & Responsibilities
+**Backend:**
+* **FastAPI**: Modern, fast, high-performance web framework for building APIs with Python.
+* **Python 3.10+**: Core programming language for backend logic and AI processing.
+* **Pydantic**: Data validation and settings management using Python type annotations.
+* **SQLAlchemy**: Powerful ORM for database interactions.
 
-- Authentication: `backned/api/v1/endpoints/auth.py` — signup, register-company, login.
-- Users: `backned/api/v1/endpoints/user.py` — profile operations, resume upload.
-- Internships: `backned/api/v1/endpoints/internship.py` — CRUD + filtering, company/admin role checks.
-- Applications: `backned/api/v1/endpoints/application.py` — apply, list personal applications, details, status updates, resume download.
-- Recommendations: `backned/api/v1/endpoints/recommendation.py` — skill-based internship recommendations.
-- Resume Analyzer: `backned/api/v1/endpoints/resume.py` — upload resume and get recommendations.
-- Company: `backned/api/v1/endpoints/company.py` — company-specific endpoints (company internships, applicants).
-- Certificates: `backned/api/v1/endpoints/certificate.py` — generate & download certificates (admin restricted).
-- Progress: `backned/api/v1/endpoints/progress.py` — add & list progress entries for applications.
-- Analytics: `backned/api/v1/endpoints/analytics.py` — admin-only analytic endpoints.
-- Admin: `backned/api/v1/endpoints/admin.py` — admin operations (approve companies/users, list/delete resources).
+**Database:**
+* **PostgreSQL / SQLite**: Relational database storage for users, internships, and applications.
 
-## Important Notes for Frontend Integration
+**Authentication:**
+* **JWT-based Authentication**: Secure, stateless token-based authentication with role-based access control (RBAC).
 
-- Login response returns `TokenResponse` with access token — store in client and send as `Authorization: Bearer <token>`.
-- Role-based UI: check `role` claim from token or user profile; many routes enforce `require_roles` on the backend.
-- File uploads: endpoints use `multipart/form-data` for resume uploads and certificate generation uses file response downloads.
+**Other Technologies:**
+* **PyPDF2 / PDFMiner**: Resume parsing libraries for extracting text from uploaded PDFs.
+* **Scikit-learn**: Used for TF-IDF vectorization and cosine similarity calculations in the AI recommendation engine.
+* **Multipart Form Data**: Handled natively by FastAPI for secure resume uploads.
 
-## Docs & Postman
+---
 
-- Machine-readable API summary: `docs/api.json`
-- Postman collection (v2.1): `docs/postman_collection.json` — ready to import into Postman; define `baseUrl` and `token` environment variables.
+## 3. CORE FEATURES
 
-## Next recommended steps
+**Authentication:**
+* **Login & Registration**: Secure onboarding for both students and companies.
+* **Role-based Access Control (RBAC)**: Distinct views and capabilities for `student`, `company`, and `admin` roles.
 
-- Auto-generate OpenAPI from running server (`/openapi.json`) and merge with `docs/api.json` for authoritative schema.
-- Expand Postman items to include all endpoints and example responses; add pre-request scripts to auto-set `{{token}}` after login.
-- Add CI job to validate docs and run backend tests.
+**Student Features:**
+* **Resume Upload & Analysis**: Upload resumes to automatically extract skills.
+* **Internship Recommendations**: AI-driven suggestions based on extracted skills.
+* **Apply to Internships**: One-click application process.
+* **Track Application Status**: Real-time visibility into application progress (pending, accepted, rejected).
 
-## Where to look in the repo
+**Company Features:**
+* **Create Internships**: Post new opportunities with descriptions, requirements, and stipends.
+* **Manage Listings (CRUD)**: Update or delete existing internship postings.
+* **View Applicants**: See all students who have applied to specific listings.
+* **Update Application Status**: Move candidates through the hiring pipeline.
 
-- Routers: `backned/api/v1/endpoints/`
-- Services & business logic: `backned/services/`
-- Repositories (DB access): `backned/repositories/`
-- Schemas: `backned/schemas/`
-- Auth/security helpers: `backned/core/security.py`
+**Admin Features:**
+* **Manage Users**: View and moderate registered students and companies.
+* **Manage Internships**: Oversee all platform activity and moderate listings.
+* **View Analytics**: Access platform-wide metrics via the admin dashboard.
+
+---
+
+## 4. AI & SMART FEATURES
+
+* **Resume Parsing**: Automatically extracts raw text from PDF documents.
+* **Skill Extraction**: Identifies key technical and soft skills using NLP techniques.
+* **Recommendation Engine**: Matches student profiles against available internships.
+* **Match Scoring System**: Calculates a percentage match based on TF-IDF cosine similarity to rank opportunities.
+
+---
+
+## 5. SYSTEM ARCHITECTURE
+
+* **Frontend → API → Backend → Database**: A decoupled architecture where the Next.js frontend communicates with the FastAPI backend via RESTful endpoints, which securely interacts with the relational database.
+* **Role-based Access Control**: JWT tokens contain role claims, enforcing strict access restrictions at the API route level.
+* **REST API Structure**: Clean, versioned endpoints grouped logically by business domain (`/api/v1/auth`, `/api/v1/internships`, etc.).
+
+---
+
+## 6. WORKFLOW
+
+1. **Student Onboarding**: Student registers and uploads their resume.
+2. **AI Processing**: Backend processes the resume, extracts skills, and builds a profile.
+3. **Matching**: The Recommendation Engine compares the profile against all active internships and returns a scored list of recommendations.
+4. **Application**: Student applies to an internship.
+5. **Company Review**: Company logs in, views the applicant pool, reviews profiles, and updates the status.
+6. **Notification**: The updated status is reflected on the student's dashboard.
+
+---
+
+## 7. FUTURE IMPROVEMENTS
+
+* **Notifications System**: Real-time email and in-app alerts for status updates.
+* **Advanced AI Matching**: Integration with Large Language Models (LLMs) for deeper semantic understanding of resumes.
+* **Real-time Updates**: WebSockets for instant messaging between companies and applicants.
+* **Company Verification System**: Automated business verification to ensure platform safety and quality.

@@ -7,14 +7,12 @@ import { FormEvent, useMemo, useState } from 'react';
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import PageHeader from '@/components/layout/PageHeader';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import Spinner from '@/components/ui/Spinner';
 import internshipService, {
   type CreateInternshipPayload,
   type Internship,
 } from '@/services/internship.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const fieldClassName =
   'w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-800 shadow-sm outline-none transition-all duration-200 placeholder:text-gray-400 focus:border-[#11486b] focus:ring-2 focus:ring-[#11486b]/20 disabled:cursor-not-allowed disabled:opacity-60';
@@ -56,15 +54,12 @@ const toFormState = (internship: Internship): InternshipFormState => ({
 });
 
 export default function CompanyEditInternshipPage() {
-  const params = useParams();
   const internshipId = Number(params?.id);
 
   const [draftFormState, setDraftFormState] = useState<{
     id: number;
     value: InternshipFormState;
   } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const {
     data,
@@ -100,16 +95,14 @@ export default function CompanyEditInternshipPage() {
     mutationFn: (payload: Partial<CreateInternshipPayload>) =>
       internshipService.update(internshipId, payload),
     onSuccess: () => {
-      setError(null);
-      setSuccess('Internship updated successfully.');
+      showSuccess('Internship updated successfully.');
     },
     onError: (err: unknown) => {
-      setSuccess(null);
       if (err instanceof AxiosError) {
         const detail = err.response?.data?.detail;
-        setError(typeof detail === 'string' ? detail : 'Failed to update internship.');
+        showError(typeof detail === 'string' ? detail : 'Failed to update internship.');
       } else {
-        setError('Failed to update internship.');
+        showError('Failed to update internship.');
       }
     },
   });
@@ -119,11 +112,8 @@ export default function CompanyEditInternshipPage() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setError(null);
-    setSuccess(null);
-
     if (!skills.length) {
-      setError('Please add at least one skill.');
+      showError('Please add at least one skill.');
       return;
     }
 
@@ -131,12 +121,12 @@ export default function CompanyEditInternshipPage() {
     const stipendValue = Number(formState.stipend);
 
     if (!Number.isFinite(durationValue) || durationValue <= 0) {
-      setError('Duration must be a positive number of weeks.');
+      showError('Duration must be a positive number of weeks.');
       return;
     }
 
     if (!Number.isFinite(stipendValue) || stipendValue < 0) {
-      setError('Stipend must be zero or a positive number.');
+      showError('Stipend must be zero or a positive number.');
       return;
     }
 
@@ -285,18 +275,6 @@ export default function CompanyEditInternshipPage() {
                 />
                 Active listing
               </label>
-
-              {error && (
-                <div className="rounded-md border border-[#ac2b49] bg-white px-3 py-2">
-                  <p className="text-sm font-medium text-[#ac2b49]">{error}</p>
-                </div>
-              )}
-
-              {success && (
-                <div className="rounded-md border border-[#478356] bg-white px-3 py-2">
-                  <p className="text-sm font-medium text-[#478356]">{success}</p>
-                </div>
-              )}
 
               <Button type="submit" variant="primary" isLoading={mutation.isPending}>
                 Save Changes

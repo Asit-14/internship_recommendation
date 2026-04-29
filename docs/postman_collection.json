@@ -1,41 +1,26 @@
 {
   "info": {
-    "name": "InternshipT API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0"
+    "name": "Internship Platform API",
+    "description": "Postman collection for testing the entire FastAPI backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8000/api/v1" },
-    { "key": "token", "value": "" }
-  ],
   "item": [
     {
       "name": "Auth",
       "item": [
         {
-          "name": "Login",
+          "name": "Register Student",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"secret\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
-            }
-          }
-        },
-        {
-          "name": "Signup (Student)",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Student Name\",\n  \"email\": \"student@example.com\",\n  \"password\": \"secret\"\n}"
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"student@example.com\",\n  \"password\": \"securepassword\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/signup",
@@ -48,10 +33,15 @@
           "name": "Register Company",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Company\",\n  \"email\": \"hr@company.com\",\n  \"password\": \"secret\"\n}"
+              "raw": "{\n  \"name\": \"Tech Corp\",\n  \"email\": \"hr@techcorp.com\",\n  \"password\": \"securepassword\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register-company",
@@ -59,17 +49,43 @@
               "path": ["auth", "register-company"]
             }
           }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"securepassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
         }
       ]
     },
     {
-      "name": "Users",
+      "name": "User/Profile",
       "item": [
         {
           "name": "Get Profile",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/users/profile",
               "host": ["{{baseUrl}}"],
@@ -82,53 +98,73 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"bio\": \"Updated bio\"\n}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Passionate developer\",\n  \"skills\": [\"Python\", \"React\"]\n}"
+            },
             "url": {
               "raw": "{{baseUrl}}/users/profile",
               "host": ["{{baseUrl}}"],
               "path": ["users", "profile"]
             }
           }
-        },
-        {
-          "name": "Upload Resume",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "body": {
-              "mode": "formdata",
-              "formdata": [{ "key": "resume", "type": "file", "src": "" }]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/upload-resume",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "upload-resume"]
-            }
-          }
         }
       ]
     },
     {
-      "name": "Internships",
+      "name": "Internship",
       "item": [
         {
-          "name": "List Internships",
+          "name": "Create Internship (Company)",
           "request": {
-            "method": "GET",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Frontend Intern\",\n  \"description\": \"React developer wanted\",\n  \"location\": \"Remote\",\n  \"stipend\": 1000\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/internships",
+              "raw": "{{baseUrl}}/internships/",
               "host": ["{{baseUrl}}"],
-              "path": ["internships"]
+              "path": ["internships", ""]
             }
           }
         },
         {
-          "name": "Get Internship by ID",
+          "name": "Get All Internships",
           "request": {
             "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/internships/",
+              "host": ["{{baseUrl}}"],
+              "path": ["internships", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Internship By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/internships/1",
               "host": ["{{baseUrl}}"],
@@ -137,50 +173,87 @@
           }
         },
         {
-          "name": "Create Internship (Company)",
+          "name": "Update Internship (Company)",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Intern\",\n  \"description\": \"Role description\"\n}"
+              "raw": "{\n  \"stipend\": 1500\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/internships",
+              "raw": "{{baseUrl}}/internships/1",
               "host": ["{{baseUrl}}"],
-              "path": ["internships"]
+              "path": ["internships", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Internship (Company)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/internships/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["internships", "1"]
             }
           }
         }
       ]
     },
     {
-      "name": "Applications",
+      "name": "Application",
       "item": [
         {
           "name": "Apply to Internship (Student)",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"internship_id\": 1\n}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"internship_id\": 1\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/applications",
+              "raw": "{{baseUrl}}/applications/",
               "host": ["{{baseUrl}}"],
-              "path": ["applications"]
+              "path": ["applications", ""]
             }
           }
         },
         {
-          "name": "Get My Applications",
+          "name": "Get My Applications (Student)",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/applications/my",
               "host": ["{{baseUrl}}"],
@@ -189,32 +262,44 @@
           }
         },
         {
-          "name": "Get Application Details",
+          "name": "Get Applicants (Company)",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
-              "raw": "{{baseUrl}}/applications/1",
+              "raw": "{{baseUrl}}/company/internships/1/applicants",
               "host": ["{{baseUrl}}"],
-              "path": ["applications", "1"]
+              "path": ["company", "internships", "1", "applicants"]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Recommend",
-      "item": [
+        },
         {
-          "name": "Get Recommendations",
+          "name": "Update Application Status (Company)",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"skills\": [\"python\", \"sql\"]\n}" },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"accepted\"\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/recommendations",
+              "raw": "{{baseUrl}}/applications/1/status",
               "host": ["{{baseUrl}}"],
-              "path": ["recommendations"]
+              "path": ["applications", "1", "status"]
             }
           }
         }
@@ -224,13 +309,46 @@
       "name": "Resume Analyzer",
       "item": [
         {
+          "name": "Upload Resume",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/upload-resume",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "upload-resume"]
+            }
+          }
+        },
+        {
           "name": "Analyze Resume",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [],
             "body": {
               "mode": "formdata",
-              "formdata": [{ "key": "resume", "type": "file", "src": "" }]
+              "formdata": [
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
             },
             "url": {
               "raw": "{{baseUrl}}/resume/analyze",
@@ -238,21 +356,25 @@
               "path": ["resume", "analyze"]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Company",
-      "item": [
+        },
         {
-          "name": "Company Internships",
+          "name": "Get Recommendations",
           "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skills\": [\"Python\", \"React\"]\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/company/internships",
+              "raw": "{{baseUrl}}/recommendations/",
               "host": ["{{baseUrl}}"],
-              "path": ["company", "internships"]
+              "path": ["recommendations", ""]
             }
           }
         }
@@ -262,18 +384,67 @@
       "name": "Admin",
       "item": [
         {
-          "name": "List Users",
+          "name": "Get Users",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/admin/users",
               "host": ["{{baseUrl}}"],
               "path": ["admin", "users"]
             }
           }
+        },
+        {
+          "name": "Manage Internships",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/internships",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "internships"]
+            }
+          }
+        },
+        {
+          "name": "Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "dashboard"]
+            }
+          }
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here"
     }
   ]
 }

@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import InternshipList from '@/features/internship/InternshipList';
 import applicationService, { type Application } from '@/services/application.service';
 import internshipService from '@/services/internship.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
@@ -25,7 +26,6 @@ const readErrorMessage = (error: unknown, fallback: string): string => {
 export default function InternshipListingPage() {
   const queryClient = useQueryClient();
   const [applyingId, setApplyingId] = useState<number | null>(null);
-  const [applyError, setApplyError] = useState<string | null>(null);
 
   const internshipsQuery = useQuery({
     queryKey: ['internships'],
@@ -40,13 +40,13 @@ export default function InternshipListingPage() {
   const applyMutation = useMutation({
     mutationFn: (internshipId: number) => applicationService.applyToInternship(internshipId),
     onSuccess: () => {
-      setApplyError(null);
+      showSuccess('Applied Successfully!');
       setApplyingId(null);
       queryClient.invalidateQueries({ queryKey: ['my-applications'] });
     },
     onError: (error) => {
       setApplyingId(null);
-      setApplyError(readErrorMessage(error, 'Failed to apply for this internship.'));
+      showError(readErrorMessage(error, 'Failed to apply for this internship.'));
     },
   });
 
@@ -76,11 +76,6 @@ export default function InternshipListingPage() {
       <div className="space-y-8">
         <PageHeader title="Internships" description="Browse verified internships and apply." />
 
-        {applyError && (
-          <Card>
-            <p className="text-sm font-medium text-[#ac2b49]">{applyError}</p>
-          </Card>
-        )}
         <InternshipList
           internships={internships}
           isLoading={internshipsQuery.isLoading}

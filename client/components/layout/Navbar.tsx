@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,10 +13,15 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, logout, role } = useAuth();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const isLoggedIn = isAuthenticated;
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const navLinks = (() => {
-    if (!isLoggedIn) return publicLinks;
+    if (!isMounted || !isLoggedIn) return publicLinks;
     if (role === 'student') {
       return [
         { label: 'Dashboard', href: '/dashboard' },
@@ -82,7 +87,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            {isLoggedIn ? (
+            {isMounted && isLoggedIn ? (
               <Button
                 variant="secondary"
                 onClick={logout}
@@ -140,7 +145,7 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="border-t border-gray-200 pt-3">
-              {isLoggedIn ? (
+              {isMounted && isLoggedIn ? (
                 <button onClick={logout} className="text-left text-sm font-medium text-gray-600">
                   Logout
                 </button>

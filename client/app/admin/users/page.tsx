@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
 import adminService, { type AdminUser } from '@/services/admin.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
@@ -44,12 +45,24 @@ export default function AdminUsersPage() {
 
   const approveMutation = useMutation({
     mutationFn: (userId: number) => adminService.approveUser(userId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onSuccess: () => {
+      showSuccess('User approved successfully.');
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+    onError: (error) => {
+      showError(getErrorMessage(error, 'Failed to approve user.'));
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (userId: number) => adminService.deleteUser(userId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onSuccess: () => {
+      showSuccess('User deleted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+    onError: (error) => {
+      showError(getErrorMessage(error, 'Failed to delete user.'));
+    },
   });
 
   const users = data ?? [];

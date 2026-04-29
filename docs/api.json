@@ -1,368 +1,463 @@
 {
-  "title": "InternshipT API",
-  "version": "1.0",
-  "basePath": "/api/v1",
-  "modules": [
+  "Auth": [
     {
-      "name": "Authentication",
-      "tag": "Authentication",
-      "endpoints": [
-        {
-          "path": "/auth/signup",
-          "method": "POST",
-          "description": "Create student user",
-          "request": "SignupRequest",
-          "response": "UserResponse",
-          "auth_required": false,
-          "status_codes": [201, 409]
-        },
-        {
-          "path": "/auth/register-company",
-          "method": "POST",
-          "description": "Register a company account",
-          "request": "CompanySignupRequest",
-          "response": "UserResponse",
-          "auth_required": false,
-          "status_codes": [201, 409]
-        },
-        {
-          "path": "/auth/login",
-          "method": "POST",
-          "description": "Login and receive JWT token",
-          "request": "LoginRequest",
-          "response": "TokenResponse",
-          "auth_required": false,
-          "status_codes": [200, 401]
+      "name": "Register Student",
+      "method": "POST",
+      "endpoint": "/auth/signup",
+      "description": "Register a new student user",
+      "request": {
+        "body": {
+          "name": "John Doe",
+          "email": "student@example.com",
+          "password": "securepassword"
         }
-      ]
+      },
+      "response": {
+        "success": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "student@example.com",
+          "role": "student"
+        },
+        "error": {
+          "message": "Email already registered"
+        }
+      },
+      "auth_required": false,
+      "role": []
     },
     {
-      "name": "Users",
-      "tag": "Users",
-      "endpoints": [
-        {
-          "path": "/users/profile",
-          "method": "GET",
-          "description": "Get current user's profile",
-          "response": "UserProfileResponse",
-          "auth_required": true
-        },
-        {
-          "path": "/users/profile",
-          "method": "PUT",
-          "description": "Update current user's profile",
-          "request": "UserProfileUpdateRequest",
-          "response": "UserProfileResponse",
-          "auth_required": true
-        },
-        {
-          "path": "/users/upload-resume",
-          "method": "POST",
-          "description": "Upload resume file (multipart)",
-          "request": "file: UploadFile",
-          "response": "ResumeUploadResponse",
-          "auth_required": true
+      "name": "Register Company",
+      "method": "POST",
+      "endpoint": "/auth/register-company",
+      "description": "Register a new company user",
+      "request": {
+        "body": {
+          "name": "Tech Corp",
+          "email": "hr@techcorp.com",
+          "password": "securepassword"
         }
-      ]
+      },
+      "response": {
+        "success": {
+          "id": 2,
+          "name": "Tech Corp",
+          "email": "hr@techcorp.com",
+          "role": "company"
+        },
+        "error": {
+          "message": "Email already registered"
+        }
+      },
+      "auth_required": false,
+      "role": []
     },
     {
-      "name": "Internships",
-      "tag": "Internships",
-      "endpoints": [
-        {
-          "path": "/internships/",
-          "method": "GET",
-          "description": "Search & list active internships (query filters: location, skills, sector, stipend_min, stipend_max, duration_min, duration_max, user_skills)",
-          "response": "List[InternshipResponse]",
-          "auth_required": false
-        },
-        {
-          "path": "/internships/{id}",
-          "method": "GET",
-          "description": "Get internship by id",
-          "response": "InternshipResponse",
-          "auth_required": false
-        },
-        {
-          "path": "/internships/",
-          "method": "POST",
-          "description": "Create internship (company only)",
-          "request": "CompanyInternshipCreate",
-          "response": "InternshipResponse",
-          "auth_required": true,
-          "roles": ["company"]
-        },
-        {
-          "path": "/internships/{id}",
-          "method": "DELETE",
-          "description": "Delete internship (company only)",
-          "auth_required": true,
-          "roles": ["company"],
-          "status_codes": [204, 403, 404]
-        },
-        {
-          "path": "/internships/{id}",
-          "method": "PUT/PATCH",
-          "description": "Update internship (company/admin)",
-          "request": "InternshipUpdate",
-          "response": "InternshipResponse",
-          "auth_required": true,
-          "roles": ["company", "admin"]
+      "name": "Login User",
+      "method": "POST",
+      "endpoint": "/auth/login",
+      "description": "Authenticate user and return token",
+      "request": {
+        "body": {
+          "email": "student@example.com",
+          "password": "securepassword"
         }
-      ]
+      },
+      "response": {
+        "success": {
+          "access_token": "eyJhbGciOiJIUzI1...",
+          "token_type": "bearer",
+          "user": {
+            "id": 1,
+            "email": "student@example.com",
+            "role": "student"
+          }
+        },
+        "error": {
+          "message": "Invalid credentials"
+        }
+      },
+      "auth_required": false,
+      "role": []
+    }
+  ],
+  "User/Profile": [
+    {
+      "name": "Get Profile",
+      "method": "GET",
+      "endpoint": "/users/profile",
+      "description": "Get current user profile details",
+      "request": {},
+      "response": {
+        "success": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "student@example.com",
+          "role": "student",
+          "bio": "Software Engineering Student"
+        },
+        "error": {
+          "message": "Not authenticated"
+        }
+      },
+      "auth_required": true,
+      "role": ["student", "company", "admin"]
     },
     {
-      "name": "Applications",
-      "tag": "Applications",
-      "endpoints": [
-        {
-          "path": "/applications/",
-          "method": "POST",
-          "description": "Apply to internship (student)",
-          "request": "ApplicationCreateRequest",
-          "response": "ApplicationResponse",
-          "auth_required": true,
-          "roles": ["student"]
-        },
-        {
-          "path": "/applications/my",
-          "method": "GET",
-          "description": "Get current student's applications",
-          "response": "List[ApplicationResponse]",
-          "auth_required": true,
-          "roles": ["student"]
-        },
-        {
-          "path": "/applications/{id}",
-          "method": "GET",
-          "description": "Get application details (owner/company/admin)",
-          "response": "ApplicationDetailResponse",
-          "auth_required": true
-        },
-        {
-          "path": "/applications/{id}/status",
-          "method": "PATCH",
-          "description": "Update application status (company/admin)",
-          "request": "ApplicationStatusUpdateRequest",
-          "response": "ApplicationResponse",
-          "auth_required": true,
-          "roles": ["company", "admin"]
-        },
-        {
-          "path": "/applications/{id}/resume",
-          "method": "GET",
-          "description": "Download the submitted resume file",
-          "response": "FileResponse",
-          "auth_required": true
+      "name": "Update Profile",
+      "method": "PUT",
+      "endpoint": "/users/profile",
+      "description": "Update current user profile",
+      "request": {
+        "body": {
+          "bio": "Passionate developer looking for internships",
+          "skills": ["Python", "React", "Next.js"]
         }
-      ]
+      },
+      "response": {
+        "success": {
+          "id": 1,
+          "name": "John Doe",
+          "bio": "Passionate developer looking for internships"
+        },
+        "error": {
+          "message": "Validation Error"
+        }
+      },
+      "auth_required": true,
+      "role": ["student", "company", "admin"]
+    }
+  ],
+  "Internship": [
+    {
+      "name": "Create Internship",
+      "method": "POST",
+      "endpoint": "/internships/",
+      "description": "Create a new internship posting",
+      "request": {
+        "body": {
+          "title": "Frontend Developer Intern",
+          "description": "Work with Next.js and Tailwind CSS",
+          "location": "Remote",
+          "stipend": 1000
+        }
+      },
+      "response": {
+        "success": {
+          "id": 10,
+          "title": "Frontend Developer Intern",
+          "company_id": 2
+        },
+        "error": {
+          "message": "Not authorized"
+        }
+      },
+      "auth_required": true,
+      "role": ["company"]
     },
     {
-      "name": "Recommendations",
-      "tag": "Recommendations",
-      "endpoints": [
-        {
-          "path": "/recommendations/",
-          "method": "POST",
-          "description": "Get internship recommendations for provided skills/profile",
-          "request": "RecommendationRequest",
-          "response": "RecommendationResponse",
-          "auth_required": false
-        }
-      ]
+      "name": "Get All Internships",
+      "method": "GET",
+      "endpoint": "/internships/",
+      "description": "List all active internships",
+      "request": {},
+      "response": {
+        "success": [
+          {
+            "id": 10,
+            "title": "Frontend Developer Intern",
+            "location": "Remote"
+          }
+        ],
+        "error": {}
+      },
+      "auth_required": false,
+      "role": []
     },
     {
-      "name": "Resume Analyzer",
-      "tag": "Resume",
-      "endpoints": [
-        {
-          "path": "/resume/analyze",
-          "method": "POST",
-          "description": "Analyze uploaded resume and return recommendations (multipart file)",
-          "request": "file: UploadFile",
-          "response": "List[ResumeRecommendationItem]",
-          "auth_required": false
+      "name": "Get Internship By ID",
+      "method": "GET",
+      "endpoint": "/internships/{id}",
+      "description": "Get details of a specific internship",
+      "request": {},
+      "response": {
+        "success": {
+          "id": 10,
+          "title": "Frontend Developer Intern",
+          "description": "Work with Next.js and Tailwind CSS"
+        },
+        "error": {
+          "message": "Internship not found"
         }
-      ]
+      },
+      "auth_required": false,
+      "role": []
     },
     {
-      "name": "Company",
-      "tag": "Company",
-      "endpoints": [
-        {
-          "path": "/company/internships",
-          "method": "GET",
-          "description": "Get internships created by current company",
-          "response": "List[InternshipResponse]",
-          "auth_required": true,
-          "roles": ["company"]
-        },
-        {
-          "path": "/company/internships/{id}/applicants",
-          "method": "GET",
-          "description": "Get applicants for a company internship",
-          "response": "List[ApplicantSummaryResponse]",
-          "auth_required": true,
-          "roles": ["company", "admin"]
+      "name": "Update Internship",
+      "method": "PUT",
+      "endpoint": "/internships/{id}",
+      "description": "Update an existing internship posting",
+      "request": {
+        "body": {
+          "stipend": 1500
         }
-      ]
+      },
+      "response": {
+        "success": {
+          "id": 10,
+          "title": "Frontend Developer Intern",
+          "stipend": 1500
+        },
+        "error": {
+          "message": "Not authorized"
+        }
+      },
+      "auth_required": true,
+      "role": ["company", "admin"]
     },
     {
-      "name": "Certificates",
-      "tag": "Certificates",
-      "endpoints": [
-        {
-          "path": "/certificate/generate",
-          "method": "POST",
-          "description": "Generate a certificate (admin)",
-          "request": "CertificateGenerateRequest",
-          "response": "CertificateResponse",
-          "auth_required": true,
-          "roles": ["admin"]
+      "name": "Delete Internship",
+      "method": "DELETE",
+      "endpoint": "/internships/{id}",
+      "description": "Delete an internship posting",
+      "request": {},
+      "response": {
+        "success": {
+          "message": "Internship deleted successfully"
         },
-        {
-          "path": "/certificate/{id}",
-          "method": "GET",
-          "description": "Download certificate PDF",
-          "response": "FileResponse",
-          "auth_required": true
+        "error": {
+          "message": "Not authorized"
         }
-      ]
+      },
+      "auth_required": true,
+      "role": ["company", "admin"]
+    }
+  ],
+  "Application": [
+    {
+      "name": "Apply to Internship",
+      "method": "POST",
+      "endpoint": "/applications/",
+      "description": "Submit an application for an internship",
+      "request": {
+        "body": {
+          "internship_id": 10
+        }
+      },
+      "response": {
+        "success": {
+          "id": 5,
+          "internship_id": 10,
+          "status": "pending"
+        },
+        "error": {
+          "message": "Already applied to this internship"
+        }
+      },
+      "auth_required": true,
+      "role": ["student"]
     },
     {
-      "name": "Internship Progress",
-      "tag": "Internship Progress",
-      "endpoints": [
-        {
-          "path": "/progress/",
-          "method": "POST",
-          "description": "Add progress entry for an application",
-          "request": "ProgressCreate",
-          "response": "ProgressResponse",
-          "auth_required": true
-        },
-        {
-          "path": "/progress/{application_id}",
-          "method": "GET",
-          "description": "Get progress logs for an application",
-          "response": "List[ProgressResponse]",
-          "auth_required": true
-        }
-      ]
+      "name": "Get My Applications",
+      "method": "GET",
+      "endpoint": "/applications/my",
+      "description": "List applications submitted by the student",
+      "request": {},
+      "response": {
+        "success": [
+          {
+            "id": 5,
+            "internship_id": 10,
+            "status": "pending"
+          }
+        ],
+        "error": {}
+      },
+      "auth_required": true,
+      "role": ["student"]
     },
     {
-      "name": "Analytics",
-      "tag": "Analytics",
-      "endpoints": [
-        {
-          "path": "/analytics/dashboard",
-          "method": "GET",
-          "description": "Dashboard analytics (admin)",
-          "response": "DashboardAnalyticsResponse",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/analytics/users",
-          "method": "GET",
-          "description": "Users analytics (admin)",
-          "response": "UsersAnalyticsResponse",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/analytics/internships",
-          "method": "GET",
-          "description": "Internships analytics (admin)",
-          "response": "InternshipsAnalyticsResponse",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/analytics/applications",
-          "method": "GET",
-          "description": "Applications analytics (admin)",
-          "response": "ApplicationsAnalyticsResponse",
-          "auth_required": true,
-          "roles": ["admin"]
+      "name": "Get Applicants",
+      "method": "GET",
+      "endpoint": "/company/internships/{id}/applicants",
+      "description": "List all applicants for a specific internship",
+      "request": {},
+      "response": {
+        "success": [
+          {
+            "id": 5,
+            "student_id": 1,
+            "status": "pending"
+          }
+        ],
+        "error": {
+          "message": "Not authorized"
         }
-      ]
+      },
+      "auth_required": true,
+      "role": ["company"]
     },
     {
-      "name": "Admin",
-      "tag": "Admin",
-      "endpoints": [
-        {
-          "path": "/admin/users",
-          "method": "GET",
-          "description": "List users (admin)",
-          "response": "List[UserResponse]",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/companies",
-          "method": "GET",
-          "description": "List companies (admin)",
-          "response": "List[UserResponse]",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/company/{id}",
-          "method": "GET",
-          "description": "Get company detail (admin)",
-          "response": "AdminCompanyDetailResponse",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/company/{id}/approve",
-          "method": "PATCH",
-          "description": "Approve a company (admin)",
-          "response": "UserResponse",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/users/{id}/approve",
-          "method": "PATCH",
-          "description": "Approve user/company (admin)",
-          "response": "UserResponse",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/users/{id}",
-          "method": "DELETE",
-          "description": "Delete user (admin)",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/internships",
-          "method": "GET",
-          "description": "List all internships (admin)",
-          "response": "List[InternshipResponse]",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/internships/{id}",
-          "method": "DELETE",
-          "description": "Delete internship (admin)",
-          "auth_required": true,
-          "roles": ["admin"]
-        },
-        {
-          "path": "/admin/analytics/overview",
-          "method": "GET",
-          "description": "Admin overview analytics (admin)",
-          "response": "AdminOverviewResponse",
-          "auth_required": true,
-          "roles": ["admin"]
+      "name": "Update Application Status",
+      "method": "PATCH",
+      "endpoint": "/applications/{id}/status",
+      "description": "Update the status of an application",
+      "request": {
+        "body": {
+          "status": "accepted"
         }
-      ]
+      },
+      "response": {
+        "success": {
+          "id": 5,
+          "status": "accepted"
+        },
+        "error": {
+          "message": "Not authorized"
+        }
+      },
+      "auth_required": true,
+      "role": ["company", "admin"]
+    }
+  ],
+  "Resume Analyzer": [
+    {
+      "name": "Upload Resume",
+      "method": "POST",
+      "endpoint": "/users/upload-resume",
+      "description": "Upload a resume file",
+      "request": {
+        "body": {
+          "file": "<binary file data>"
+        }
+      },
+      "response": {
+        "success": {
+          "filename": "resume.pdf",
+          "url": "/uploads/resumes/resume.pdf"
+        },
+        "error": {
+          "message": "Invalid file format"
+        }
+      },
+      "auth_required": true,
+      "role": ["student"]
+    },
+    {
+      "name": "Analyze Resume",
+      "method": "POST",
+      "endpoint": "/resume/analyze",
+      "description": "Analyze resume and extract skills",
+      "request": {
+        "body": {
+          "file": "<binary file data>"
+        }
+      },
+      "response": {
+        "success": [
+          {
+            "skill": "Python",
+            "match_score": 0.95
+          },
+          {
+            "skill": "React",
+            "match_score": 0.88
+          }
+        ],
+        "error": {
+          "message": "Processing failed"
+        }
+      },
+      "auth_required": false,
+      "role": []
+    },
+    {
+      "name": "Get Recommendations",
+      "method": "POST",
+      "endpoint": "/recommendations/",
+      "description": "Get AI recommendations based on profile/resume",
+      "request": {
+        "body": {
+          "skills": ["Python", "FastAPI", "React"]
+        }
+      },
+      "response": {
+        "success": {
+          "recommendations": [
+            {
+              "internship_id": 10,
+              "score": 92.5
+            }
+          ]
+        },
+        "error": {}
+      },
+      "auth_required": false,
+      "role": []
+    }
+  ],
+  "Admin": [
+    {
+      "name": "Get Users",
+      "method": "GET",
+      "endpoint": "/admin/users",
+      "description": "List all users in the platform",
+      "request": {},
+      "response": {
+        "success": [
+          {
+            "id": 1,
+            "email": "student@example.com",
+            "role": "student"
+          }
+        ],
+        "error": {
+          "message": "Not authorized"
+        }
+      },
+      "auth_required": true,
+      "role": ["admin"]
+    },
+    {
+      "name": "Manage Internships",
+      "method": "GET",
+      "endpoint": "/admin/internships",
+      "description": "List all internships across all companies",
+      "request": {},
+      "response": {
+        "success": [
+          {
+            "id": 10,
+            "title": "Frontend Developer Intern",
+            "company_id": 2
+          }
+        ],
+        "error": {
+          "message": "Not authorized"
+        }
+      },
+      "auth_required": true,
+      "role": ["admin"]
+    },
+    {
+      "name": "Analytics Dashboard",
+      "method": "GET",
+      "endpoint": "/analytics/dashboard",
+      "description": "Get system-wide analytics data",
+      "request": {},
+      "response": {
+        "success": {
+          "total_users": 150,
+          "total_internships": 45,
+          "total_applications": 320
+        },
+        "error": {
+          "message": "Not authorized"
+        }
+      },
+      "auth_required": true,
+      "role": ["admin"]
     }
   ]
 }

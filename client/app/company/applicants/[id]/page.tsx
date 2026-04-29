@@ -12,10 +12,8 @@ import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
 import StatusBadge from '@/features/application/StatusBadge';
-import applicationService, {
-  type ApplicationDetail,
-  type ApplicationStatus,
 } from '@/services/application.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
@@ -80,8 +78,12 @@ export default function CompanyApplicantsPage() {
     mutationFn: ({ id, status }: { id: number; status: ApplicationStatus }) =>
       applicationService.updateStatus(id, status),
     onSuccess: () => {
+      showSuccess('Applicant status updated successfully.');
       queryClient.invalidateQueries({ queryKey: ['company-applicants', internshipId] });
       queryClient.invalidateQueries({ queryKey: ['application-detail', selectedApplicationId] });
+    },
+    onError: (error) => {
+      showError(readErrorMessage(error, 'Failed to update status.'));
     },
   });
 
@@ -105,7 +107,7 @@ export default function CompanyApplicantsPage() {
       link.click();
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      setDownloadError(readErrorMessage(error, 'Failed to download resume.'));
+      showError(readErrorMessage(error, 'Failed to download resume.'));
     }
   };
 
@@ -263,9 +265,6 @@ export default function CompanyApplicantsPage() {
                         <span className="text-xs text-gray-500">Resume not uploaded.</span>
                       )}
                     </div>
-                    {downloadError && (
-                      <p className="mt-2 text-xs font-medium text-[#ac2b49]">{downloadError}</p>
-                    )}
                   </div>
 
                   <div>

@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 import { Input, type SelectOption } from '@/components/ui/Input';
 import Spinner from '@/components/ui/Spinner';
 import userService, { type UpdateProfilePayload, type UserProfile } from '@/services/user.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 type ProfileFormState = {
   name: string;
@@ -98,8 +99,6 @@ export default function ProfilePage() {
   const [formErrors, setFormErrors] = useState<ProfileFormErrors>({});
   const [skillInput, setSkillInput] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const graduationYearOptions = useMemo(() => buildGraduationYearOptions(), []);
 
@@ -122,12 +121,10 @@ export default function ProfilePage() {
       queryClient.setQueryData(['user-profile'], updatedProfile);
       setFormDraft(null);
       setFormErrors({});
-      setSuccessMessage('Profile updated successfully.');
-      setErrorMessage(null);
+      showSuccess('Profile updated successfully.');
     },
     onError: (error) => {
-      setSuccessMessage(null);
-      setErrorMessage(readErrorMessage(error, 'Failed to update profile.'));
+      showError(readErrorMessage(error, 'Failed to update profile.'));
     },
   });
 
@@ -135,12 +132,11 @@ export default function ProfilePage() {
     mutationFn: (file: File) => userService.uploadResume(file),
     onSuccess: (result) => {
       setResumeFile(null);
-      setSuccessMessage(`Resume uploaded successfully: ${result.filename}`);
-      setErrorMessage(null);
+      showSuccess(`Resume uploaded successfully: ${result.filename}`);
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
     },
     onError: (error) => {
-      setSuccessMessage(null);
-      setErrorMessage(readErrorMessage(error, 'Failed to upload resume.'));
+      showError(readErrorMessage(error, 'Failed to upload resume.'));
     },
   });
 
@@ -236,8 +232,7 @@ export default function ProfilePage() {
     const errors = validateForm(activeForm);
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      setSuccessMessage(null);
-      setErrorMessage('Please fix form errors before saving.');
+      showError('Please fix form errors before saving.');
       return;
     }
 
@@ -252,20 +247,15 @@ export default function ProfilePage() {
       skills: activeForm.skills,
     };
 
-    setSuccessMessage(null);
-    setErrorMessage(null);
     updateMutation.mutate(payload);
   };
 
   const handleResumeUpload = () => {
     if (!resumeFile) {
-      setSuccessMessage(null);
-      setErrorMessage('Please select a resume file first.');
+      showError('Please select a resume file first.');
       return;
     }
 
-    setSuccessMessage(null);
-    setErrorMessage(null);
     uploadMutation.mutate(resumeFile);
   };
 
@@ -276,20 +266,6 @@ export default function ProfilePage() {
           title="Profile"
           description="Manage your personal information, skills, and resume."
         />
-
-        <div className="space-y-4">
-          {successMessage && (
-            <div className="rounded-md border border-[#478356] bg-white px-4 py-3">
-              <p className="text-sm font-medium text-[#478356]">{successMessage}</p>
-            </div>
-          )}
-
-          {errorMessage && (
-            <div className="rounded-md border border-[#ac2b49] bg-white px-4 py-3">
-              <p className="text-sm font-medium text-[#ac2b49]">{errorMessage}</p>
-            </div>
-          )}
-        </div>
 
         {profileQuery.isLoading && (
           <Card>

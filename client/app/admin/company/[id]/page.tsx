@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
 import adminService from '@/services/admin.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
@@ -36,7 +37,13 @@ export default function AdminCompanyDetailPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (internshipId: number) => adminService.deleteInternship(internshipId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-company', companyId] }),
+    onSuccess: () => {
+      showSuccess('Internship deleted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['admin-company', companyId] });
+    },
+    onError: (error) => {
+      showError(readErrorMessage(error, 'Failed to delete internship.'));
+    },
   });
 
   const errorMessage = error ? readErrorMessage(error, 'Failed to load company details.') : null;

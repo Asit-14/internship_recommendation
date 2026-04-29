@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import authService from '@/services/auth.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 type RegisterFormProps = {
   onSuccess?: () => void;
@@ -18,13 +19,11 @@ export default function RegisterForm({ onSuccess, mode = 'student' }: RegisterFo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const isCompany = mode === 'company';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null);
 
     try {
       if (isCompany) {
@@ -32,13 +31,14 @@ export default function RegisterForm({ onSuccess, mode = 'student' }: RegisterFo
       } else {
         await authService.signup({ name, email, password });
       }
+      showSuccess('Account created successfully');
       onSuccess?.();
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         const detail = err.response?.data?.detail;
-        setError(typeof detail === 'string' ? detail : 'Registration failed. Please try again.');
+        showError(typeof detail === 'string' ? detail : 'Registration failed. Please try again.');
       } else {
-        setError('Registration failed. Please try again.');
+        showError('Registration failed. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -77,12 +77,6 @@ export default function RegisterForm({ onSuccess, mode = 'student' }: RegisterFo
           placeholder="Min 8 chars, uppercase, lowercase, number, special"
           required
         />
-
-        {error && (
-          <div className="rounded-md border border-[#ac2b49] bg-white px-3 py-2">
-            <p className="text-sm font-medium text-[#ac2b49]">{error}</p>
-          </div>
-        )}
 
         <Button type="submit" variant="primary" fullWidth isLoading={isSubmitting}>
           Create Account

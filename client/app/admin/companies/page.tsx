@@ -11,6 +11,7 @@ import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
 import adminService, { type AdminUser } from '@/services/admin.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
@@ -41,7 +42,13 @@ export default function AdminCompaniesPage() {
 
   const approveMutation = useMutation({
     mutationFn: (companyId: number) => adminService.approveUser(companyId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-companies'] }),
+    onSuccess: () => {
+      showSuccess('Company approved successfully.');
+      queryClient.invalidateQueries({ queryKey: ['admin-companies'] });
+    },
+    onError: (error) => {
+      showError(getErrorMessage(error, 'Failed to approve company.'));
+    },
   });
 
   const companies = data ?? [];

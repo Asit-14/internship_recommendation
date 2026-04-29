@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 
 import { getToken, removeToken, setToken } from '@/lib/axios';
 import authService from '@/services/auth.service';
+import { showInfo } from '@/lib/toast';
 
 const ROLE_STORAGE_KEY = 'auth_role';
 const VERIFIED_STORAGE_KEY = 'auth_verified';
@@ -169,6 +170,7 @@ export const useAuth = () => {
   const logout = useCallback((): void => {
     removeToken();
     storeRole(null);
+    showInfo('Logged out successfully');
     router.replace('/login');
     router.refresh();
   }, [router]);

@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import Spinner from '@/components/ui/Spinner';
 import { useAuth } from '@/hooks/useAuth';
+import { showError, showSuccess } from '@/lib/toast';
 
 export default function LoginPage() {
   return (
@@ -41,7 +42,6 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const nextPath = getSafeRedirectPath(searchParams.get('next'));
   const isFreshRegistration = searchParams.get('registered') === '1';
@@ -56,7 +56,6 @@ function LoginContent() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
-    setError(null);
 
     try {
       const { role: loggedRole } = await login({ email, password });
@@ -66,13 +65,14 @@ function LoginContent() {
           : loggedRole === 'company'
             ? '/company/dashboard'
             : '/dashboard';
+      showSuccess('Logged in successfully');
       router.replace(nextPath ?? fallbackPath);
     } catch (caughtError: unknown) {
       if (caughtError instanceof AxiosError) {
         const detail = caughtError.response?.data?.detail;
-        setError(typeof detail === 'string' ? detail : 'Login failed. Check your credentials.');
+        showError(typeof detail === 'string' ? detail : 'Login failed. Check your credentials.');
       } else {
-        setError('Login failed. Please try again.');
+        showError('Login failed. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -135,12 +135,6 @@ function LoginContent() {
                 </Link>
               </div>
             </div>
-
-            {error && (
-              <div className="rounded border border-[#ac2b49] bg-white px-3 py-2">
-                <p className="text-center text-[11px] font-medium text-[#ac2b49]">{error}</p>
-              </div>
-            )}
 
             <Button
               type="submit"

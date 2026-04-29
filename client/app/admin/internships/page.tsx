@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
 import adminService from '@/services/admin.service';
+import { showError, showSuccess } from '@/lib/toast';
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
@@ -32,7 +33,13 @@ export default function AdminInternshipsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => adminService.deleteInternship(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-internships'] }),
+    onSuccess: () => {
+      showSuccess('Internship deleted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['admin-internships'] });
+    },
+    onError: (error) => {
+      showError(readErrorMessage(error, 'Failed to delete internship.'));
+    },
   });
 
   const internships = data ?? [];
