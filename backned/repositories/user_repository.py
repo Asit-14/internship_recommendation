@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 
 from models.user_model import User, UserRole
@@ -87,3 +88,23 @@ class UserRepository:
     def delete(self, user: User) -> None:
         self.db.delete(user)
         self.db.commit()
+
+    def set_otp(self, user: User, *, otp_hash: str, expiry: datetime) -> User:
+        user.otp_hash = otp_hash
+        user.otp_expiry = expiry
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def clear_otp(self, user: User) -> User:
+        user.otp_hash = None
+        user.otp_expiry = None
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def update_password(self, user: User, *, password_hash: str) -> User:
+        user.password_hash = password_hash
+        self.db.commit()
+        self.db.refresh(user)
+        return user

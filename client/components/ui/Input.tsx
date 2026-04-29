@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, InputHTMLAttributes, SelectHTMLAttributes } from 'react';
 
 export type SelectOption = {
   label: string;
@@ -19,7 +19,9 @@ type InputProps = {
   disabled?: boolean;
   accept?: string;
   multiple?: boolean;
-};
+  className?: string;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'id'> & 
+    Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange' | 'value' | 'id'>;
 
 const fieldClassName =
   'w-full rounded-md border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-800 shadow-sm outline-none transition-all duration-200 placeholder:text-gray-400 focus:border-[#11486b] focus:ring-2 focus:ring-[#11486b]/20 disabled:cursor-not-allowed disabled:opacity-60';
@@ -41,6 +43,8 @@ export function Input({
   disabled = false,
   accept,
   multiple = false,
+  className,
+  ...props
 }: InputProps) {
   const fieldId = id;
   const errorId = `${id}-error`;
@@ -62,7 +66,8 @@ export function Input({
           disabled={disabled}
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
-          className={fieldClassName}
+          className={`${fieldClassName} ${className || ''}`}
+          {...(props as SelectHTMLAttributes<HTMLSelectElement>)}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -82,7 +87,8 @@ export function Input({
           multiple={multiple}
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
-          className={`${fileFieldClassName} ${error ? 'border-[#ac2b49] focus:border-[#ac2b49] focus:ring-[#ac2b49]/20' : ''}`}
+          className={`${fileFieldClassName} ${error ? 'border-[#ac2b49] focus:border-[#ac2b49] focus:ring-[#ac2b49]/20' : ''} ${className || ''}`}
+          {...(props as InputHTMLAttributes<HTMLInputElement>)}
         />
       ) : (
         <input
@@ -97,7 +103,8 @@ export function Input({
           autoComplete="off"
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
-          className={`${fieldClassName} ${error ? 'border-[#ac2b49] focus:border-[#ac2b49] focus:ring-[#ac2b49]/20' : ''}`}
+          className={`${fieldClassName} ${error ? 'border-[#ac2b49] focus:border-[#ac2b49] focus:ring-[#ac2b49]/20' : ''} ${className || ''}`}
+          {...(props as InputHTMLAttributes<HTMLInputElement>)}
         />
       )}
 

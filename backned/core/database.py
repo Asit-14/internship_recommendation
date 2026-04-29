@@ -122,6 +122,8 @@ def ensure_user_table_columns(engine) -> None:
     add_column("graduation_year", "graduation_year INTEGER")
     add_column("skills", f"skills {json_type} NOT NULL {json_default}")
     add_column("resume_filename", "resume_filename VARCHAR(255)")
+    add_column("otp_hash", "otp_hash VARCHAR(255)")
+    add_column("otp_expiry", f"otp_expiry {timestamp_type}")
     add_column("is_verified", f"is_verified BOOLEAN NOT NULL {bool_default}")
     add_column(
         "created_at",

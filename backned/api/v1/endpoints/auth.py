@@ -5,12 +5,22 @@ from core.database import get_db
 from repositories.user_repository import UserRepository
 from schemas.auth_schema import (
     CompanySignupRequest,
+    LoginOTPRequest,
     LoginRequest,
+    ResetPasswordRequest,
+    SendOTPRequest,
     SignupRequest,
     TokenResponse,
     UserResponse,
+    VerifyOTPRequest,
 )
-from services.auth_service import AuthService, InvalidCredentialsError, UserAlreadyExistsError
+from services.auth_service import (
+    AuthService,
+    InvalidCredentialsError,
+    InvalidOTPError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -57,3 +67,38 @@ def login(payload: LoginRequest, service: AuthService = Depends(get_auth_service
             detail=str(exc),
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
+
+
+@router.post("/send-otp", status_code=status.HTTP_200_OK)
+def send_otp(payload: SendOTPRequest, service: AuthService = Depends(get_auth_service)):
+    try:
+        service.send_otp(payload)
+        return {"message": "OTP sent successfully"}
+    except UserNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+
+@router.post("/verify-otp", status_code=status.HTTP_200_OK)
+def verify_otp(payload: VerifyOTPRequest, service: AuthService = Depends(get_auth_service)):
+    try:
+        service.verify_otp(payload)
+        return {"message": "OTP verified successfully"}
+    except (UserNotFoundError, InvalidOTPError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+def reset_password(payload: ResetPasswordRequest, service: AuthService = Depends(get_auth_service)):
+    try:
+        service.reset_password(payload)
+        return {"message": "Password reset successfully"}
+    except (UserNotFoundError, InvalidOTPError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+@router.post("/login-otp", response_model=TokenResponse, status_code=status.HTTP_200_OK)
+def login_otp(payload: LoginOTPRequest, service: AuthService = Depends(get_auth_service)):
+    try:
+        return service.login_otp(payload)
+    except (UserNotFoundError, InvalidOTPError) as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc

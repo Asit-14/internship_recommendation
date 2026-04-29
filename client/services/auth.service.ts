@@ -33,6 +33,26 @@ export type CompanySignupPayload = {
   password: string;
 };
 
+export type SendOTPPayload = {
+  email: string;
+};
+
+export type VerifyOTPPayload = {
+  email: string;
+  otp: string;
+};
+
+export type ResetPasswordPayload = {
+  email: string;
+  otp: string;
+  new_password: string;
+};
+
+export type LoginWithOTPPayload = {
+  email: string;
+  otp: string;
+};
+
 const authService = {
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     const response = await api.post<LoginResponse>('/auth/login', payload);
@@ -46,6 +66,26 @@ const authService = {
 
   registerCompany: async (payload: CompanySignupPayload): Promise<UserResponse> => {
     const response = await api.post<UserResponse>('/auth/register-company', payload);
+    return response.data;
+  },
+
+  sendOTP: async (payload: SendOTPPayload): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/auth/send-otp', payload);
+    return response.data;
+  },
+
+  verifyOTP: async (payload: VerifyOTPPayload): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/auth/verify-otp', payload);
+    return response.data;
+  },
+
+  resetPassword: async (payload: ResetPasswordPayload): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/auth/reset-password', payload);
+    return response.data;
+  },
+
+  loginWithOTP: async (payload: LoginWithOTPPayload): Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>('/auth/login-otp', payload);
     return response.data;
   },
 };

@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     admin_email: str | None = Field(default=None, validation_alias="ADMIN_EMAIL")
     admin_password: str | None = Field(default=None, validation_alias="ADMIN_PASSWORD")
 
+    smtp_email: str | None = Field(default=None, validation_alias="SMTP_EMAIL")
+    smtp_password: str | None = Field(default=None, validation_alias="SMTP_PASSWORD")
+    smtp_host: str = Field("smtp.gmail.com", validation_alias="SMTP_HOST")
+    smtp_port: int = Field(587, validation_alias="SMTP_PORT")
+
 
 @lru_cache()
 def get_settings() -> Settings:

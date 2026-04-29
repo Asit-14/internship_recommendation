@@ -167,6 +167,36 @@ export const useAuth = () => {
     };
   }, []);
 
+  const loginWithOTP = useCallback(
+    async ({ email, otp }: { email: string; otp: string }): Promise<LoginResult> => {
+      const data = await authService.loginWithOTP({ email, otp });
+
+      const token = data.access_token;
+      if (!token) {
+        throw new Error('Login response does not include an access token');
+      }
+
+      setToken(token);
+
+      const roleFromResponse = normalizeRole(data.user?.role);
+      const roleFromToken = normalizeRole(decodeTokenPayload(token)?.role);
+      const resolvedRole = roleFromResponse ?? roleFromToken;
+      const verifiedFromResponse = normalizeVerified(data.user?.is_verified);
+      const verifiedFromToken = normalizeVerified(decodeTokenPayload(token)?.is_verified);
+      const resolvedVerified = verifiedFromResponse ?? verifiedFromToken;
+
+      storeRole(resolvedRole);
+      storeVerification(resolvedVerified);
+
+      return {
+        token,
+        role: resolvedRole,
+        isVerified: resolvedVerified,
+      };
+    },
+    [],
+  );
+
   const logout = useCallback((): void => {
     removeToken();
     storeRole(null);
@@ -180,6 +210,7 @@ export const useAuth = () => {
     role,
     isVerified,
     login,
+    loginWithOTP,
     logout,
   };
 };

@@ -40,6 +40,8 @@ class User(Base):
     graduation_year: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     skills: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     resume_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    otp_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    otp_expiry: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

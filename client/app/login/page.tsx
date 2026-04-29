@@ -128,8 +128,7 @@ function LoginContent() {
               <div className="flex justify-end">
                 <Link
                   href="/forgot-password"
-                  title="Coming soon"
-                  className="text-[10px] font-medium text-gray-500 hover:text-gray-800"
+                  className="text-[10px] font-medium text-[#11486b] hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -145,6 +144,15 @@ function LoginContent() {
             >
               Sign In
             </Button>
+
+            <div className="text-center">
+              <Link
+                href="/login-otp"
+                className="text-[11px] font-medium text-[#11486b] hover:underline"
+              >
+                Login with OTP instead
+              </Link>
+            </div>
           </form>
 
           <div className="mt-6 border-t border-gray-200 pt-4 text-center">
