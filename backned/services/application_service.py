@@ -54,6 +54,7 @@ class ApplicationService:
         },
         ApplicationStatus.SELECTED: {
             ApplicationStatus.IN_PROGRESS,
+            ApplicationStatus.COMPLETED,
             ApplicationStatus.REJECTED,
         },
         ApplicationStatus.IN_PROGRESS: {
@@ -168,11 +169,6 @@ class ApplicationService:
         if current_user.role == UserRole.company and internship.created_by != current_user.id:
             raise ForbiddenApplicationAccessError("You cannot update this application")
 
-        if current_user.role == UserRole.company and new_status in {
-            ApplicationStatusEnum.IN_PROGRESS,
-            ApplicationStatusEnum.COMPLETED,
-        }:
-            raise InvalidStatusTransitionError("Company cannot set progress statuses")
         target_status = ApplicationStatus(new_status.value)
 
         if application.status == target_status:
@@ -181,6 +177,9 @@ class ApplicationService:
             )
 
         allowed_next = self._allowed_status_transitions.get(application.status, set())
+        print(f"DEBUG: Status update for App {application_id}")
+        print(f"DEBUG: Current: {application.status}, Target: {target_status}, Allowed: {allowed_next}")
+        
         if target_status not in allowed_next:
             raise InvalidStatusTransitionError(
                 "Invalid status transition "

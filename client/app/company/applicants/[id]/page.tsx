@@ -1,4 +1,5 @@
 'use client';
+// Refreshed imports
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -12,6 +13,9 @@ import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
 import StatusBadge from '@/features/application/StatusBadge';
+import applicationService, {
+  ApplicationDetail,
+  ApplicationStatus,
 } from '@/services/application.service';
 import { showError, showSuccess } from '@/lib/toast';
 
@@ -30,8 +34,8 @@ const allowedStatusTransitions: Record<ApplicationStatus, ApplicationStatus[]> =
   APPLIED: ['UNDER_REVIEW', 'REJECTED'],
   UNDER_REVIEW: ['SHORTLISTED', 'SELECTED', 'REJECTED'],
   SHORTLISTED: ['SELECTED', 'REJECTED'],
-  SELECTED: ['REJECTED'],
-  IN_PROGRESS: [],
+  SELECTED: ['IN_PROGRESS', 'COMPLETED', 'REJECTED'],
+  IN_PROGRESS: ['COMPLETED', 'REJECTED'],
   REJECTED: [],
   COMPLETED: [],
 };
@@ -303,6 +307,24 @@ export default function CompanyApplicantsPage() {
                         isLoading={statusMutation.isPending}
                       >
                         Select
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="text-xs bg-[#11486b] text-white hover:bg-[#0d3652] border-transparent"
+                        onClick={() => handleStatusChange('IN_PROGRESS')}
+                        disabled={!canTransitionTo.includes('IN_PROGRESS')}
+                        isLoading={statusMutation.isPending}
+                      >
+                        Start Internship
+                      </Button>
+                      <Button
+                        variant="primary"
+                        className="text-xs font-bold"
+                        onClick={() => handleStatusChange('COMPLETED')}
+                        disabled={!canTransitionTo.includes('COMPLETED')}
+                        isLoading={statusMutation.isPending}
+                      >
+                        Mark Completed
                       </Button>
                       <Button
                         variant="danger"

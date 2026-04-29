@@ -4,7 +4,10 @@ import Link from 'next/link';
 
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
+import certificateService, { Certificate } from '@/services/certificate.service';
 import type { Application } from '@/services/application.service';
+import { useQuery } from '@tanstack/react-query';
+import { showError } from '@/lib/toast';
 
 import ApplicationCard from './ApplicationCard';
 
@@ -47,6 +50,27 @@ export default function ApplicationList({
   error = null,
   onRetry,
 }: ApplicationListProps) {
+  const certificatesQuery = useQuery({
+    queryKey: ['my-certificates'],
+    queryFn: () => certificateService.getMyCertificates(),
+  });
+
+  const handleDownloadCertificate = async (certificateId: number) => {
+    try {
+      const { blob, filename } = await certificateService.download(certificateId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      showError('Failed to download certificate');
+    }
+  };
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -74,7 +98,12 @@ export default function ApplicationList({
   return (
     <div className="space-y-4">
       {applications.map((app) => (
-        <ApplicationCard key={app.id} application={app} />
+        <ApplicationCard 
+          key={app.id} 
+          application={app} 
+          certificate={certificatesQuery.data?.find(c => c.internship_id === app.internship_id)}
+          onDownloadCertificate={handleDownloadCertificate}
+        />
       ))}
     </div>
   );

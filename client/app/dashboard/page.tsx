@@ -10,6 +10,8 @@ import Card from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
 import userService from '@/services/user.service';
 import applicationService from '@/services/application.service';
+import certificateService from '@/services/certificate.service';
+import { showError } from '@/lib/toast';
 
 const studentActions = [
   {
@@ -40,6 +42,28 @@ export default function DashboardPage() {
     queryKey: ['my-applications'],
     queryFn: () => applicationService.getMyApplications(),
   });
+
+  const certificatesQuery = useQuery({
+    queryKey: ['my-certificates'],
+    queryFn: () => certificateService.getMyCertificates(),
+    enabled: role === 'student',
+  });
+
+  const handleDownloadCertificate = async (certificateId: number) => {
+    try {
+      const { blob, filename } = await certificateService.download(certificateId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      showError('Failed to download certificate');
+    }
+  };
 
   const displayName = profileQuery.data?.name || 'Student';
   const roleLabel = role ?? profileQuery.data?.role ?? 'student';
@@ -110,15 +134,60 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {recentApplications.map(app => (
-                  <div key={app.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-md">
-                    <div>
-                      <h4 className="font-medium text-[#11486b] text-sm">{app.internship_title || 'Internship'}</h4>
-                      <p className="text-xs text-gray-500">{app.company_name || 'Company'}</p>
+                {recentApplications.map(app => {
+                  const certificate = certificatesQuery.data?.find(c => c.internship_id === app.internship_id);
+                  return (
+                    <div key={app.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-md bg-white">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-[#11486b] text-sm truncate">{app.internship_title || 'Internship'}</h4>
+                        <p className="text-xs text-gray-500 truncate">{app.company_name || 'Company'}</p>
+                      </div>
+                      <div className="flex items-center gap-3 ml-4 shrink-0">
+                        {app.status === 'COMPLETED' && (
+                          certificate ? (
+                            <button
+                              onClick={() => handleDownloadCertificate(certificate.id)}
+                              title="Download Certificate"
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await certificateService.generateMissing(app.id);
+                                  await queryClient.invalidateQueries({ queryKey: ['my-certificates'] });
+                                  await queryClient.invalidateQueries({ queryKey: ['my-applications'] });
+                                } catch (e: any) {
+                                  // If it already exists, just refresh the queries
+                                  if (e.response?.status === 409) {
+                                    queryClient.invalidateQueries({ queryKey: ['my-certificates'] });
+                                  } else {
+                                    showError('Failed to sync certificate');
+                                  }
+                                }
+                              }}
+                              title="Sync Certificate"
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors animate-pulse"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            </button>
+                          )
+                        )}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                          app.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {app.status}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-md">{app.status}</span>
-                  </div>
-                ))}
+                  );
+                })}
                 {applications.length > 3 && (
                   <Link href="/applications" className="block text-center text-xs text-[#11486b] hover:underline mt-2">
                     View all applications
@@ -139,6 +208,40 @@ export default function DashboardPage() {
              </div>
           </Card>
         </div>
+
+        {certificatesQuery.data && certificatesQuery.data.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-[#11486b]">My Certificates</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {certificatesQuery.data.map(cert => {
+                // Find corresponding internship title from applications
+                const app = applications.find(a => a.internship_id === cert.internship_id);
+                return (
+                  <Card key={cert.id} className="p-4 flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-bold text-[#11486b] text-sm mb-1">
+                        {app?.internship_title || 'Internship Certificate'}
+                      </h4>
+                      <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">
+                        ID: {cert.certificate_id}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Issued on: {new Date(cert.issued_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="secondary" 
+                      className="mt-4 text-xs h-8"
+                      onClick={() => handleDownloadCertificate(cert.id)}
+                    >
+                      Download PDF
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </AuthGuard>
   );

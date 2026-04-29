@@ -36,6 +36,14 @@ class CertificateRepository:
             .one_or_none()
         )
 
+    def get_all_by_user(self, user_id: int) -> list[Certificate]:
+        return (
+            self.db.query(Certificate)
+            .filter(Certificate.user_id == user_id)
+            .order_by(Certificate.issued_at.desc())
+            .all()
+        )
+
     def create(self, *, certificate_data: dict) -> Certificate:
         certificate = Certificate(**certificate_data)
         self.db.add(certificate)

@@ -12,6 +12,7 @@ from schemas.application_schema import (
     ApplicationCreateRequest,
     ApplicationDetailResponse,
     ApplicationResponse,
+    ApplicationStatusEnum,
     ApplicationStatusUpdateRequest,
 )
 from services.application_service import (
@@ -124,6 +125,11 @@ def get_application_details(
     )
 
 
+from schemas.certificate_schema import CertificateGenerateRequest
+from api.v1.endpoints.certificate import get_certificate_service
+from services.certificate_service import CertificateService, CertificateConflictError
+
+
 @router.patch(
     "/{application_id}/status",
     response_model=ApplicationResponse,
@@ -134,6 +140,7 @@ def update_application_status(
     application_id: int = Path(gt=0),
     current_user: User = Depends(require_roles(UserRole.company, UserRole.admin)),
     service: ApplicationService = Depends(get_application_service),
+    cert_service: CertificateService = Depends(get_certificate_service),
 ) -> ApplicationResponse:
     try:
         application = service.update_application_status(
@@ -141,6 +148,20 @@ def update_application_status(
             payload.status,
             current_user,
         )
+
+        # Generate certificate if status is COMPLETED
+        if payload.status == ApplicationStatusEnum.COMPLETED:
+            try:
+                cert_service.generate_certificate(
+                    CertificateGenerateRequest(application_id=application_id),
+                    generated_by=current_user
+                )
+            except CertificateConflictError:
+                # Certificate already exists, skip generation
+                pass
+            except Exception as e:
+                # Log error but don't fail the status update
+                print(f"Error generating certificate: {e}")
     except ApplicationNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except InvalidStatusTransitionError as exc:
