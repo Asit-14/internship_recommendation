@@ -105,3 +105,15 @@ class ResumeUploadResponse(BaseModel):
     content_type: str
     size_bytes: int
     uploaded_at: datetime
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+    confirmation: str = Field(..., description="Must be 'DELETE'")
+
+    @field_validator("confirmation")
+    @classmethod
+    def validate_confirmation(cls, value: str) -> str:
+        if value != "DELETE":
+            raise ValueError("Please type 'DELETE' to confirm account deletion")
+        return value

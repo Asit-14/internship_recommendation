@@ -1,0 +1,17 @@
+{
+  "navbar.home": "முகப்பு",
+  "navbar.dashboard": "கட்டுப்பாட்டு அறை",
+  "navbar.applications": "விண்ணப்பங்கள்",
+  "navbar.profile": "சுயவிவரம்",
+  "navbar.internships": "பயிற்சிகள்",
+  "navbar.createInternship": "பயிற்சியை உருவாக்கு",
+  "navbar.adminPanel": "நிர்வாகக் குழு",
+  "navbar.analytics": "பகுப்பாய்வு",
+  "button.login": "உள்நுழைக",
+  "button.logout": "வெளியேறு",
+  "hero.title": "தேசிய பயிற்சி போர்ட்டல்",
+  "hero.subtitle": "உங்கள் சரியான பயிற்சியைக் கண்டறியவும்",
+  "gov.title": "இந்திய அரசு",
+  "gov.subtitle": "அதிகாரப்பூர்வ பயிற்சி சேவைகள்",
+  "brand.nip": "NIP"
+}

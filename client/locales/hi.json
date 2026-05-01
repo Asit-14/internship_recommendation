@@ -1,0 +1,17 @@
+{
+  "navbar.home": "होम",
+  "navbar.dashboard": "डैशबोर्ड",
+  "navbar.applications": "आवेदन",
+  "navbar.profile": "प्रोफ़ाइल",
+  "navbar.internships": "इंटर्नशिप",
+  "navbar.createInternship": "इंटर्नशिप बनाएँ",
+  "navbar.adminPanel": "एडमिन पैनल",
+  "navbar.analytics": "एनालिटिक्स",
+  "button.login": "साइन इन करें",
+  "button.logout": "लॉग आउट",
+  "hero.title": "राष्ट्रीय इंटर्नशिप पोर्टल",
+  "hero.subtitle": "अपनी सही इंटर्नशिप खोजें",
+  "gov.title": "भारत सरकार",
+  "gov.subtitle": "आधिकारिक इंटर्नशिप सेवाएँ",
+  "brand.nip": "NIP"
+}

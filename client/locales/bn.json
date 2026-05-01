@@ -1,0 +1,17 @@
+{
+  "navbar.home": "হোম",
+  "navbar.dashboard": "ড্যাশবোর্ড",
+  "navbar.applications": "আবেদনপত্র",
+  "navbar.profile": "প্রোফাইল",
+  "navbar.internships": "ইন্টার্নশিপ",
+  "navbar.createInternship": "ইন্টার্নশিপ তৈরি করুন",
+  "navbar.adminPanel": "অ্যাডমিন প্যানেল",
+  "navbar.analytics": "বিশ্লেষণ",
+  "button.login": "সাইন ইন করুন",
+  "button.logout": "লগআউট",
+  "hero.title": "জাতীয় ইন্টার্নশিপ পোর্টাল",
+  "hero.subtitle": "আপনার নিখুঁত ইন্টার্নশিপ খুঁজুন",
+  "gov.title": "ভারত সরকার",
+  "gov.subtitle": "অফিসিয়াল ইন্টার্নশিপ পরিষেবা",
+  "brand.nip": "NIP"
+}

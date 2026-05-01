@@ -1,0 +1,17 @@
+{
+  "navbar.home": "Home",
+  "navbar.dashboard": "Dashboard",
+  "navbar.applications": "Applications",
+  "navbar.profile": "Profile",
+  "navbar.internships": "Internships",
+  "navbar.createInternship": "Create Internship",
+  "navbar.adminPanel": "Admin Panel",
+  "navbar.analytics": "Analytics",
+  "button.login": "Sign In",
+  "button.logout": "Logout",
+  "hero.title": "National Internship Portal",
+  "hero.subtitle": "Find your perfect internship",
+  "gov.title": "Government of India",
+  "gov.subtitle": "Official Internship Services",
+  "brand.nip": "NIP"
+}

@@ -42,6 +42,14 @@ class User(Base):
     resume_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
     otp_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     otp_expiry: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=text("true"),
+        index=True,
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

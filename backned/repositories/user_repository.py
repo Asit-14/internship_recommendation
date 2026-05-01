@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from models.user_model import User, UserRole
@@ -105,6 +105,13 @@ class UserRepository:
 
     def update_password(self, user: User, *, password_hash: str) -> User:
         user.password_hash = password_hash
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def soft_delete(self, user: User) -> User:
+        user.is_active = False
+        user.deleted_at = datetime.now(timezone.utc)
         self.db.commit()
         self.db.refresh(user)
         return user

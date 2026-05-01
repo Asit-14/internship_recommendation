@@ -57,6 +57,13 @@ const userService = {
 
     return response.data;
   },
+
+  deleteAccount: async (password: string, confirmation: string): Promise<{ message: string }> => {
+    const response = await api.delete<{ message: string }>('/users/me', {
+      data: { password, confirmation },
+    });
+    return response.data;
+  },
 };
 
 export default userService;

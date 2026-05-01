@@ -5,6 +5,7 @@ import { ReactNode, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 
 import { getQueryClient } from '@/lib/queryClient';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 type ProvidersProps = {
   children: ReactNode;
@@ -15,8 +16,10 @@ export default function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster position="top-right" />
+      <LanguageProvider>
+        {children}
+        <Toaster position="top-right" />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

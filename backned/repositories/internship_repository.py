@@ -73,6 +73,13 @@ class InternshipRepository:
         self.db.refresh(internship)
         return internship
 
+
+    def deactivate_all_by_creator(self, creator_id: int) -> None:
+        self.db.query(Internship).filter(Internship.created_by == creator_id).update(
+            {"is_active": False}, synchronize_session=False
+        )
+        self.db.commit()
+
     def delete(self, internship: Internship) -> None:
         self.db.delete(internship)
         self.db.commit()

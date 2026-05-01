@@ -106,6 +106,9 @@ class AuthService:
         if user is None or not verify_password(payload.password, user.password_hash):
             raise InvalidCredentialsError("Invalid email or password")
 
+        if not user.is_active:
+            raise InvalidCredentialsError("Account has been deactivated")
+
         expires_delta = timedelta(minutes=settings.access_token_expire_minutes)
         token = create_access_token(
             user_id=user.id,

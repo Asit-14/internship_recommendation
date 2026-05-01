@@ -12,6 +12,9 @@ import { Input, type SelectOption } from '@/components/ui/Input';
 import Spinner from '@/components/ui/Spinner';
 import userService, { type UpdateProfilePayload, type UserProfile } from '@/services/user.service';
 import { showError, showSuccess } from '@/lib/toast';
+import Modal from '@/components/ui/Modal';
+import { removeToken } from '@/lib/axios';
+import { useRouter } from 'next/navigation';
 
 type ProfileFormState = {
   name: string;
@@ -94,11 +97,16 @@ const readErrorMessage = (error: unknown, fallback: string): string => {
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [formDraft, setFormDraft] = useState<ProfileFormState | null>(null);
   const [formErrors, setFormErrors] = useState<ProfileFormErrors>({});
   const [skillInput, setSkillInput] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
   const graduationYearOptions = useMemo(() => buildGraduationYearOptions(), []);
 
@@ -137,6 +145,18 @@ export default function ProfilePage() {
     },
     onError: (error) => {
       showError(readErrorMessage(error, 'Failed to upload resume.'));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => userService.deleteAccount(deletePassword, deleteConfirmation),
+    onSuccess: () => {
+      showSuccess('Your account has been deleted.');
+      removeToken();
+      router.push('/login');
+    },
+    onError: (error) => {
+      showError(readErrorMessage(error, 'Failed to delete account. Please check your password.'));
     },
   });
 
@@ -454,6 +474,108 @@ export default function ProfilePage() {
             </Card>
           </form>
         )}
+
+        <div className="pt-8 border-t border-gray-200">
+          <Card 
+            title="Danger Zone" 
+            className="border-red-100 bg-red-50/30"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h4 className="text-sm font-semibold text-red-800">Delete Account</h4>
+                <p className="text-sm text-red-600 mt-1">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+              </div>
+              <Button 
+                variant="secondary" 
+                className="bg-white text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                Delete Account
+              </Button>
+            </div>
+          </Card>
+        </div>
+
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setDeletePassword('');
+            setDeleteConfirmation('');
+          }}
+          title="Confirm Account Deletion"
+          variant="danger"
+          footer={
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end w-full">
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setDeletePassword('');
+                  setDeleteConfirmation('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="primary" 
+                className="bg-red-600 hover:bg-red-700 border-red-600"
+                onClick={() => deleteMutation.mutate()}
+                isLoading={deleteMutation.isPending}
+                disabled={deleteConfirmation !== 'DELETE' || !deletePassword}
+              >
+                Permanently Delete
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <div className="rounded-lg bg-red-50 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Warning</h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>
+                      This action is permanent and cannot be undone. All your data including applications, 
+                      internships, and certificates will be deactivated or removed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Input
+                id="delete-password"
+                label="Confirm Password"
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Enter your current password"
+                required
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Type <span className="font-bold">DELETE</span> to confirm
+                </label>
+                <Input
+                  id="delete-confirmation"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="DELETE"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        </Modal>
       </div>
     </AuthGuard>
   );

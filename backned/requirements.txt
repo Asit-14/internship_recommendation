@@ -14,4 +14,4 @@ email-validator
 python-multipart
 reportlab
 pdfplumber
-python-docx
+python-docx

@@ -125,6 +125,8 @@ def ensure_user_table_columns(engine) -> None:
     add_column("otp_hash", "otp_hash VARCHAR(255)")
     add_column("otp_expiry", f"otp_expiry {timestamp_type}")
     add_column("is_verified", f"is_verified BOOLEAN NOT NULL {bool_default}")
+    add_column("is_active", f"is_active BOOLEAN NOT NULL {bool_default.replace('false', 'true').replace('0', '1')}")
+    add_column("deleted_at", f"deleted_at {timestamp_type}")
     add_column(
         "created_at",
         f"created_at {timestamp_type} NOT NULL {created_at_default}",

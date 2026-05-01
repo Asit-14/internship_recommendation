@@ -5,13 +5,14 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import Button from '@/components/ui/Button';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { useAuth } from '@/hooks/useAuth';
-
-const publicLinks = [{ label: 'Home', href: '/' }];
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, logout, role } = useAuth();
+  const { t } = useTranslation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const isLoggedIn = isAuthenticated;
@@ -24,26 +25,27 @@ export default function Navbar() {
   }, []);
 
   const navLinks = (() => {
+    const publicLinks = [{ label: t('navbar.home'), href: '/' }];
     if (!isMounted || !isLoggedIn) return publicLinks;
     if (role === 'student') {
       return [
-        { label: 'Dashboard', href: '/dashboard' },
-        { label: 'Applications', href: '/applications' },
-        { label: 'Profile', href: '/profile' },
+        { label: t('navbar.dashboard'), href: '/dashboard' },
+        { label: t('navbar.applications'), href: '/applications' },
+        { label: t('navbar.profile'), href: '/profile' },
       ];
     }
     if (role === 'company') {
       return [
-        { label: 'Dashboard', href: '/company/dashboard' },
-        { label: 'Internships', href: '/company/internships' },
-        { label: 'Create Internship', href: '/company/create-internship' },
-        { label: 'Profile', href: '/profile' },
+        { label: t('navbar.dashboard'), href: '/company/dashboard' },
+        { label: t('navbar.internships'), href: '/company/internships' },
+        { label: t('navbar.createInternship'), href: '/company/create-internship' },
+        { label: t('navbar.profile'), href: '/profile' },
       ];
     }
     if (role === 'admin') {
       return [
-        { label: 'Admin Panel', href: '/admin' },
-        { label: 'Analytics', href: '/admin/analytics' },
+        { label: t('navbar.adminPanel'), href: '/admin' },
+        { label: t('navbar.analytics'), href: '/admin/analytics' },
       ];
     }
     return publicLinks;
@@ -55,13 +57,16 @@ export default function Navbar() {
         <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
           <div className="flex flex-col leading-tight">
             <span className="text-[11px] uppercase tracking-[0.25em] text-white/70">
-              Government of India
+              {t('gov.title')}
             </span>
-            <span className="text-sm font-semibold">National Internship Portal</span>
+            <span className="text-sm font-semibold">{t('hero.title')}</span>
           </div>
-          <span className="hidden text-xs font-semibold text-white/80 sm:inline">
-            Official Internship Services
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="hidden text-xs font-semibold text-white/80 sm:inline">
+              {t('gov.subtitle')}
+            </span>
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
 
@@ -69,7 +74,7 @@ export default function Navbar() {
         <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link href="/" className="text-sm font-semibold text-[#11486b]">
-              NIP
+              {t('brand.nip')}
             </Link>
 
             <nav className="hidden items-center gap-6 md:flex">
@@ -96,12 +101,12 @@ export default function Navbar() {
                 onClick={logout}
                 className="hidden h-9 px-4 text-xs font-semibold sm:inline-flex"
               >
-                Logout
+                {t('button.logout')}
               </Button>
             ) : (
               <Link href="/login" className="hidden sm:block">
                 <Button variant="primary" className="h-9 px-4 text-xs font-semibold">
-                  Sign In
+                  {t('button.login')}
                 </Button>
               </Link>
             )}
@@ -150,7 +155,7 @@ export default function Navbar() {
             <div className="border-t border-gray-200 pt-3">
               {isMounted && isLoggedIn ? (
                 <button onClick={logout} className="text-left text-sm font-medium text-gray-600">
-                  Logout
+                  {t('button.logout')}
                 </button>
               ) : (
                 <Link
@@ -158,7 +163,7 @@ export default function Navbar() {
                   onClick={() => setIsMobileOpen(false)}
                   className="text-sm font-medium text-gray-600"
                 >
-                  Sign In
+                  {t('button.login')}
                 </Link>
               )}
             </div>

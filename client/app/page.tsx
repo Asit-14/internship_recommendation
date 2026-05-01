@@ -8,6 +8,7 @@ import { useState, useMemo } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
 import applicationService from '@/services/application.service';
 import RecommendationForm, {
   type RecommendationFormData,
@@ -48,6 +49,7 @@ const highlights = [
 
 export default function HomePage() {
   const { role, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const isStudent = isAuthenticated && role === 'student';
   const [results, setResults] = useState<Recommendation[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -86,13 +88,13 @@ export default function HomePage() {
       <section className="rounded-2xl bg-[linear-gradient(135deg,#11486b,#1c5d85)] py-20 text-center text-white">
         <div className="mx-auto max-w-3xl space-y-4 px-4">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-            Government of India
+            {t('gov.title')}
           </p>
           <h1 className="text-4xl font-bold leading-tight md:text-5xl">
-            National Internship Portal
+            {t('hero.title')}
           </h1>
           <p className="text-base text-white/80 md:text-lg">
-            Discover verified internships and receive recommendations tailored to your skills.
+            {t('hero.subtitle')}
           </p>
           <div className="flex justify-center">
             <Link href="/#recommendations">

@@ -82,6 +82,9 @@ def _resolve_user_from_token(token: str, db: Session) -> User:
     if user is None:
         raise _credentials_exception()
 
+    if not user.is_active:
+        raise _credentials_exception()
+
     return user
 
 
