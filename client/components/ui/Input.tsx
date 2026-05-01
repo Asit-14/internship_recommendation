@@ -1,4 +1,4 @@
-import { ChangeEvent, InputHTMLAttributes, SelectHTMLAttributes } from 'react';
+import { ChangeEvent, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
 
 export type SelectOption = {
   label: string;
@@ -7,7 +7,7 @@ export type SelectOption = {
 
 type InputProps = {
   id: string;
-  label: string;
+  label?: ReactNode;
   value?: string;
   onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   type?: 'text' | 'email' | 'password' | 'select' | 'file';
@@ -51,10 +51,12 @@ export function Input({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={fieldId} className="text-sm font-semibold text-gray-700">
-        {label}
-        {required && <span className="ml-0.5 text-[#da6328]">*</span>}
-      </label>
+      {label && (
+        <label htmlFor={fieldId} className="text-sm font-semibold text-gray-700">
+          {label}
+          {required && <span className="ml-0.5 text-[#da6328]">*</span>}
+        </label>
+      )}
 
       {type === 'select' ? (
         <select

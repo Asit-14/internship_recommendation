@@ -1,34 +1,57 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
-    
-    // We want the root /health endpoint, so we strip out /api/v1 if it exists
-    const baseUrl = apiBaseUrl.replace('/api/v1', '');
+    const apiBaseUrl =
+      process.env.API_BASE_URL ||
+      "https://internship-recommendation-gypb.onrender.com/api/v1";
+
+    // Remove "/api/v1" safely (only if it's at the end)
+    const baseUrl = apiBaseUrl.endsWith("/api/v1")
+      ? apiBaseUrl.slice(0, -7)
+      : apiBaseUrl;
+
     const healthUrl = `${baseUrl}/health`;
 
+    // Add timeout (important for serverless)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
     const response = await fetch(healthUrl, {
-      // Don't cache this request, we want a real network call every time
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
+      method: "GET",
+      cache: "no-store",
+      signal: controller.signal,
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      return NextResponse.json({ success: true, message: 'Keep-alive ping successful', data });
-    } else {
+    clearTimeout(timeout);
+
+    if (!response.ok) {
       return NextResponse.json(
-        { success: false, message: `Keep-alive ping failed with status: ${response.status}` },
-        { status: response.status }
+        {
+          success: false,
+          message: `Ping failed with status ${response.status}`,
+        },
+        { status: response.status },
       );
     }
-  } catch (error: any) {
+
+    const data = await response.json();
+
+    return NextResponse.json({
+      success: true,
+      message: "Keep-alive ping successful",
+      data,
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
     return NextResponse.json(
-      { success: false, message: 'Keep-alive ping failed', error: error.message },
-      { status: 500 }
+      {
+        success: false,
+        message: "Keep-alive ping failed",
+        error: message,
+      },
+      { status: 500 },
     );
   }
 }

@@ -20,7 +20,8 @@ export const showError = (message: unknown) => {
       } else if (Array.isArray(msg.detail)) {
         const firstDetail = msg.detail[0];
         if (firstDetail && typeof firstDetail === 'object') {
-          displayMessage = (firstDetail as any).msg || JSON.stringify(firstDetail);
+          const d = firstDetail as Record<string, unknown>;
+          displayMessage = typeof d.msg === 'string' ? d.msg : JSON.stringify(firstDetail);
         } else {
           displayMessage = String(firstDetail);
         }

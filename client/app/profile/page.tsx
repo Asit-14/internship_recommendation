@@ -561,18 +561,18 @@ export default function ProfilePage() {
                 placeholder="Enter your current password"
                 required
               />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type <span className="font-bold">DELETE</span> to confirm
-                </label>
-                <Input
-                  id="delete-confirmation"
-                  value={deleteConfirmation}
-                  onChange={(e) => setDeleteConfirmation(e.target.value)}
-                  placeholder="DELETE"
-                  required
-                />
-              </div>
+              <Input
+                id="delete-confirmation"
+                label={
+                  <span>
+                    Type <span className="font-bold">DELETE</span> to confirm
+                  </span>
+                }
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="DELETE"
+                required
+              />
             </div>
           </div>
         </Modal>
