@@ -39,7 +39,15 @@ class User(Base):
     branch: Mapped[str | None] = mapped_column(String(120), nullable=True)
     graduation_year: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     skills: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    resume_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    resume_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    
+    # Company specific fields
+    company_description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    website: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    industry: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    company_size: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    established_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    
     otp_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     otp_expiry: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active: Mapped[bool] = mapped_column(

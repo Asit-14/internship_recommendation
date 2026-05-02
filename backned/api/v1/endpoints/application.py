@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, status
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from core.config import settings
@@ -35,10 +35,7 @@ def get_application_service(db: Session = Depends(get_db)) -> ApplicationService
 
 
 def _build_resume_url(application_id: int, resume_key: str | None) -> str | None:
-    if not resume_key:
-        return None
-
-    return f"{settings.api_v1_prefix}/applications/{application_id}/resume"
+    return resume_key
 
 
 @router.post("/", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
@@ -179,15 +176,15 @@ def update_application_status(
 
 @router.get(
     "/{application_id}/resume",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_302_FOUND,
 )
 def download_application_resume(
     application_id: int = Path(gt=0),
     current_user: User = Depends(get_current_user),
     service: ApplicationService = Depends(get_application_service),
-) -> FileResponse:
+) -> RedirectResponse:
     try:
-        resume_path = service.get_application_resume_path(application_id, current_user)
+        resume_url = service.get_application_resume_url(application_id, current_user)
     except ApplicationNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except ForbiddenApplicationAccessError as exc:
@@ -195,8 +192,4 @@ def download_application_resume(
     except ResumeNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
-    return FileResponse(
-        path=resume_path,
-        filename=resume_path.name,
-        media_type="application/octet-stream",
-    )
+    return RedirectResponse(url=resume_url)

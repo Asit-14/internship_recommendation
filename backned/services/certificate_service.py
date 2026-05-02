@@ -8,6 +8,9 @@ from models.user_model import User, UserRole
 from repositories.certificate_repository import CertificateRepository
 from schemas.certificate_schema import CertificateGenerateRequest, CertificateResponse
 from utils.pdf_generator import generate_certificate_pdf
+from core.config import settings
+import cloudinary
+import cloudinary.uploader
 
 
 class CertificateNotFoundError(Exception):
@@ -90,12 +93,35 @@ class CertificateService:
             output_dir=self.certificates_dir,
         )
 
+        if not settings.cloudinary_cloud_name:
+            raise CertificateValidationError("Cloudinary configuration is missing")
+
+        cloudinary.config(
+            cloud_name=settings.cloudinary_cloud_name,
+            api_key=settings.cloudinary_api_key,
+            api_secret=settings.cloudinary_api_secret,
+            secure=True
+        )
+
+        try:
+            upload_result = cloudinary.uploader.upload(
+                str(file_path),
+                public_id=certificate_id,
+                folder="certificates",
+                resource_type="raw"
+            )
+            certificate_url = upload_result.get("secure_url")
+        except Exception as e:
+            raise CertificateValidationError(f"Failed to upload certificate: {str(e)}")
+        finally:
+            file_path.unlink(missing_ok=True)
+
         certificate = self.certificate_repository.create(
             certificate_data={
                 "user_id": application.user_id,
                 "internship_id": application.internship_id,
                 "certificate_id": certificate_id,
-                "certificate_url": file_path.as_posix(),
+                "certificate_url": certificate_url,
             }
         )
         return CertificateResponse.model_validate(certificate)
@@ -104,12 +130,12 @@ class CertificateService:
         certificates = self.certificate_repository.get_all_by_user(current_user.id)
         return [CertificateResponse.model_validate(c) for c in certificates]
 
-    def get_certificate_file(
+    def get_certificate(
         self,
         certificate_db_id: int,
         *,
         current_user: User,
-    ) -> tuple[Certificate, Path]:
+    ) -> Certificate:
         certificate = self.certificate_repository.get_by_id(certificate_db_id)
         if certificate is None:
             raise CertificateNotFoundError("Certificate not found")
@@ -117,18 +143,7 @@ class CertificateService:
         if current_user.role == UserRole.student and certificate.user_id != current_user.id:
             raise CertificatePermissionDeniedError("You can only download your own certificate")
 
-        file_path = Path(certificate.certificate_url)
-        if not file_path.is_absolute():
-            file_path = (Path.cwd() / file_path).resolve()
-
-        if not file_path.exists():
-            fallback = (self.certificates_dir / f"{certificate.certificate_id}.pdf").resolve()
-            if fallback.exists():
-                file_path = fallback
-            else:
-                raise CertificateNotFoundError("Certificate file not found")
-
-        return certificate, file_path
+        return certificate
 
     def get_certificate_by_id(self, certificate_id: str) -> CertificateResponse:
         certificate = self.certificate_repository.get_by_certificate_id(certificate_id)

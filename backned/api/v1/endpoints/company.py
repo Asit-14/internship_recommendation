@@ -29,10 +29,7 @@ def get_application_service(db: Session = Depends(get_db)) -> ApplicationService
 
 
 def _build_resume_url(application_id: int, resume_key: str | None) -> str | None:
-    if not resume_key:
-        return None
-
-    return f"{settings.api_v1_prefix}/applications/{application_id}/resume"
+    return resume_key
 
 
 @router.get("/internships", response_model=list[InternshipResponse], status_code=status.HTTP_200_OK)

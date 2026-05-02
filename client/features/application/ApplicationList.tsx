@@ -55,20 +55,8 @@ export default function ApplicationList({
     queryFn: () => certificateService.getMyCertificates(),
   });
 
-  const handleDownloadCertificate = async (certificateId: number) => {
-    try {
-      const { blob, filename } = await certificateService.download(certificateId);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      showError('Failed to download certificate');
-    }
+  const handleDownloadCertificate = (certificateUrl: string) => {
+    window.open(certificateUrl, '_blank', 'noopener,noreferrer');
   };
 
   if (isLoading) {

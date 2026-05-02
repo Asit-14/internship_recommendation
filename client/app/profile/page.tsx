@@ -26,6 +26,11 @@ type ProfileFormState = {
   branch: string;
   graduation_year: string;
   skills: string[];
+  company_description: string;
+  website: string;
+  industry: string;
+  company_size: string;
+  established_year: string;
 };
 
 type EditableField =
@@ -35,7 +40,12 @@ type EditableField =
   | 'education'
   | 'college_name'
   | 'branch'
-  | 'graduation_year';
+  | 'graduation_year'
+  | 'company_description'
+  | 'website'
+  | 'industry'
+  | 'company_size'
+  | 'established_year';
 
 type ProfileFormErrors = Partial<Record<EditableField, string>>;
 
@@ -60,6 +70,17 @@ const buildGraduationYearOptions = (): SelectOption[] => {
   return options;
 };
 
+const buildEstablishedYearOptions = (): SelectOption[] => {
+  const currentYear = new Date().getFullYear();
+  const options: SelectOption[] = [{ label: 'Select established year', value: '' }];
+
+  for (let year = currentYear; year >= 1800; year -= 1) {
+    options.push({ label: String(year), value: String(year) });
+  }
+
+  return options;
+};
+
 const emptyForm: ProfileFormState = {
   name: '',
   email: '',
@@ -70,6 +91,11 @@ const emptyForm: ProfileFormState = {
   branch: '',
   graduation_year: '',
   skills: [],
+  company_description: '',
+  website: '',
+  industry: '',
+  company_size: '',
+  established_year: '',
 };
 
 const toFormState = (profile: UserProfile): ProfileFormState => ({
@@ -82,6 +108,11 @@ const toFormState = (profile: UserProfile): ProfileFormState => ({
   branch: profile.branch ?? '',
   graduation_year: profile.graduation_year ? String(profile.graduation_year) : '',
   skills: profile.skills ?? [],
+  company_description: profile.company_description ?? '',
+  website: profile.website ?? '',
+  industry: profile.industry ?? '',
+  company_size: profile.company_size ?? '',
+  established_year: profile.established_year ? String(profile.established_year) : '',
 });
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
@@ -109,6 +140,7 @@ export default function ProfilePage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
   const graduationYearOptions = useMemo(() => buildGraduationYearOptions(), []);
+  const establishedYearOptions = useMemo(() => buildEstablishedYearOptions(), []);
 
   const profileQuery = useQuery({
     queryKey: ['user-profile'],
@@ -140,7 +172,7 @@ export default function ProfilePage() {
     mutationFn: (file: File) => userService.uploadResume(file),
     onSuccess: (result) => {
       setResumeFile(null);
-      showSuccess(`Resume uploaded successfully: ${result.filename}`);
+      showSuccess(`Resume uploaded successfully.`);
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
     },
     onError: (error) => {
@@ -214,33 +246,43 @@ export default function ProfilePage() {
 
   const validateForm = (form: ProfileFormState): ProfileFormErrors => {
     const errors: ProfileFormErrors = {};
+    const role = profileQuery.data?.role;
 
     if (!form.name.trim()) {
-      errors.name = 'Name is required';
+      errors.name = role === 'company' ? 'Company name is required' : 'Name is required';
     }
 
     if (!form.location.trim()) {
       errors.location = 'Location is required';
     }
 
-    if (!form.education.trim()) {
-      errors.education = 'Education is required';
-    }
-
-    if (!form.college_name.trim()) {
-      errors.college_name = 'College name is required';
-    }
-
-    if (!form.branch.trim()) {
-      errors.branch = 'Branch is required';
-    }
-
-    if (!form.graduation_year) {
-      errors.graduation_year = 'Graduation year is required';
-    }
-
     if (form.phone.trim() && !/^\+?[0-9]{7,15}$/.test(form.phone.trim())) {
       errors.phone = 'Phone must contain 7 to 15 digits and optional leading +';
+    }
+
+    if (role === 'company') {
+      if (!form.company_description.trim()) {
+        errors.company_description = 'Company description is required';
+      }
+      if (!form.industry.trim()) {
+        errors.industry = 'Industry is required';
+      }
+      if (!form.established_year) {
+        errors.established_year = 'Established year is required';
+      }
+    } else {
+      if (!form.education.trim()) {
+        errors.education = 'Education is required';
+      }
+      if (!form.college_name.trim()) {
+        errors.college_name = 'College name is required';
+      }
+      if (!form.branch.trim()) {
+        errors.branch = 'Branch is required';
+      }
+      if (!form.graduation_year) {
+        errors.graduation_year = 'Graduation year is required';
+      }
     }
 
     return errors;
@@ -256,15 +298,24 @@ export default function ProfilePage() {
       return;
     }
 
+    const isCompany = profileQuery.data?.role === 'company';
+
     const payload: UpdateProfilePayload = {
       name: activeForm.name.trim(),
       phone: activeForm.phone.trim() || null,
       location: activeForm.location.trim(),
-      education: activeForm.education.trim(),
-      college_name: activeForm.college_name.trim(),
-      branch: activeForm.branch.trim(),
-      graduation_year: activeForm.graduation_year ? Number(activeForm.graduation_year) : null,
-      skills: activeForm.skills,
+      
+      education: isCompany ? null : activeForm.education.trim(),
+      college_name: isCompany ? null : activeForm.college_name.trim(),
+      branch: isCompany ? null : activeForm.branch.trim(),
+      graduation_year: (!isCompany && activeForm.graduation_year) ? Number(activeForm.graduation_year) : null,
+      skills: isCompany ? [] : activeForm.skills,
+      
+      company_description: isCompany ? activeForm.company_description.trim() : null,
+      website: isCompany ? (activeForm.website.trim() || null) : null,
+      industry: isCompany ? activeForm.industry.trim() : null,
+      company_size: isCompany ? (activeForm.company_size.trim() || null) : null,
+      established_year: (isCompany && activeForm.established_year) ? Number(activeForm.established_year) : null,
     };
 
     updateMutation.mutate(payload);
@@ -351,7 +402,62 @@ export default function ProfilePage() {
               </div>
             </Card>
 
-            <Card title="Education">
+            {profileQuery.data.role === 'company' && (
+              <Card title="Company Details">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    id="company_description"
+                    name="company_description"
+                    label="Description"
+                    value={activeForm.company_description}
+                    onChange={handleFieldChange}
+                    required
+                    error={formErrors.company_description}
+                  />
+                  <Input
+                    id="industry"
+                    name="industry"
+                    label="Industry"
+                    value={activeForm.industry}
+                    onChange={handleFieldChange}
+                    required
+                    error={formErrors.industry}
+                  />
+                  <Input
+                    id="company_size"
+                    name="company_size"
+                    label="Company Size (e.g. 1-10, 50-100)"
+                    value={activeForm.company_size}
+                    onChange={handleFieldChange}
+                    error={formErrors.company_size}
+                  />
+                  <Input
+                    id="established_year"
+                    name="established_year"
+                    label="Established Year"
+                    type="select"
+                    options={establishedYearOptions}
+                    value={activeForm.established_year}
+                    onChange={handleFieldChange}
+                    required
+                    error={formErrors.established_year}
+                  />
+                  <Input
+                    id="website"
+                    name="website"
+                    label="Website URL"
+                    type="url"
+                    value={activeForm.website}
+                    onChange={handleFieldChange}
+                    error={formErrors.website}
+                  />
+                </div>
+              </Card>
+            )}
+
+            {profileQuery.data.role !== 'company' && (
+              <>
+                <Card title="Education">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
                   id="education"
@@ -448,9 +554,24 @@ export default function ProfilePage() {
                   }}
                 />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs text-gray-500">
-                    Supported formats: PDF, DOCX. Max size: 5 MB.
-                  </p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-gray-500">
+                      Supported formats: PDF, DOCX. Max size: 5 MB.
+                    </p>
+                    {profileQuery.data?.resume_url && (
+                      <a 
+                        href={profileQuery.data.resume_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        View current resume
+                      </a>
+                    )}
+                  </div>
                   <Button
                     type="button"
                     variant="secondary"
@@ -463,6 +584,8 @@ export default function ProfilePage() {
                 </div>
               </div>
             </Card>
+              </>
+            )}
 
             <Card title="Save Changes">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

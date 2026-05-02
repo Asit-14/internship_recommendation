@@ -98,17 +98,9 @@ export default function CompanyApplicantsPage() {
     statusMutation.mutate({ id: selectedApplicant.application_id, status });
   };
 
-  const handleResumeDownload = async (detail: ApplicationDetail) => {
-    try {
-      const { blob, filename } = await applicationService.downloadResume(detail.id);
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      showError(readErrorMessage(error, 'Failed to download resume.'));
+  const handleResumeDownload = (detail: ApplicationDetail) => {
+    if (detail.resume_url) {
+      window.open(detail.resume_url, '_blank', 'noopener,noreferrer');
     }
   };
 

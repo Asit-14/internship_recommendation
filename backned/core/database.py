@@ -121,7 +121,15 @@ def ensure_user_table_columns(engine) -> None:
     add_column("branch", "branch VARCHAR(120)")
     add_column("graduation_year", "graduation_year INTEGER")
     add_column("skills", f"skills {json_type} NOT NULL {json_default}")
-    add_column("resume_filename", "resume_filename VARCHAR(255)")
+    add_column("resume_url", "resume_url VARCHAR(500)")
+    
+    # Company specific fields
+    add_column("company_description", "company_description VARCHAR(1000)")
+    add_column("website", "website VARCHAR(255)")
+    add_column("industry", "industry VARCHAR(120)")
+    add_column("company_size", "company_size VARCHAR(50)")
+    add_column("established_year", "established_year INTEGER")
+
     add_column("otp_hash", "otp_hash VARCHAR(255)")
     add_column("otp_expiry", f"otp_expiry {timestamp_type}")
     add_column("is_verified", f"is_verified BOOLEAN NOT NULL {bool_default}")

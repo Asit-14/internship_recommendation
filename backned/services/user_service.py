@@ -7,6 +7,9 @@ from models.user_model import User, UserRole
 from repositories.user_repository import UserRepository
 from repositories.internship_repository import InternshipRepository
 from schemas.user_schema import ResumeUploadResponse, UserProfileUpdateRequest
+from core.config import settings
+import cloudinary
+import cloudinary.uploader
 
 
 class EmptyProfileUpdateError(Exception):
@@ -72,19 +75,41 @@ class UserService:
         if file_size > self._max_resume_size_bytes:
             raise InvalidResumeFileError("Resume must be 5 MB or smaller")
 
+        if not settings.cloudinary_cloud_name:
+            raise InvalidResumeFileError("Cloudinary configuration is missing")
+
+        cloudinary.config(
+            cloud_name=settings.cloudinary_cloud_name,
+            api_key=settings.cloudinary_api_key,
+            api_secret=settings.cloudinary_api_secret,
+            secure=True
+        )
+
+        # Write to a temporary file to upload safely
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        stored_filename = f"user_{current_user.id}_{timestamp}{extension}"
-        output_path = self.upload_dir / stored_filename
+        public_id = f"user_{current_user.id}_{timestamp}"
+        output_path = self.upload_dir / f"{public_id}{extension}"
         output_path.write_bytes(content)
 
-        self.user_repository.set_resume_filename(current_user, resume_filename=stored_filename)
+        # Upload to Cloudinary
+        try:
+            upload_result = cloudinary.uploader.upload(
+                str(output_path),
+                public_id=public_id,
+                folder="resumes",
+                resource_type="raw"
+            )
+            resume_url = upload_result.get("secure_url")
+        except Exception as e:
+            raise InvalidResumeFileError(f"Failed to upload resume: {str(e)}")
+        finally:
+            output_path.unlink(missing_ok=True)
+
+        self.user_repository.set_resume_url(current_user, resume_url=resume_url)
 
         return ResumeUploadResponse(
-            filename=stored_filename,
-            content_type=file.content_type or "application/octet-stream",
-            size_bytes=file_size,
-            uploaded_at=datetime.now(timezone.utc),
+            resume_url=resume_url
         )
 
     def delete_account(self, current_user: User, password: str) -> None:

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import PageHeader from '@/components/layout/PageHeader';
@@ -10,8 +11,9 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Spinner from '@/components/ui/Spinner';
 import Table from '@/components/ui/Table';
+import Modal from '@/components/ui/Modal';
 import { useAuth } from '@/hooks/useAuth';
-import internshipService from '@/services/internship.service';
+import internshipService, { Internship } from '@/services/internship.service';
 import { showError, showSuccess } from '@/lib/toast';
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
@@ -28,6 +30,7 @@ const readErrorMessage = (error: unknown, fallback: string): string => {
 export default function CompanyDashboardPage() {
   const queryClient = useQueryClient();
   const { isVerified } = useAuth();
+  const [internshipToDelete, setInternshipToDelete] = useState<Internship | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['company-internships'],
@@ -40,9 +43,11 @@ export default function CompanyDashboardPage() {
     onSuccess: () => {
       showSuccess('Internship deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['company-internships'] });
+      setInternshipToDelete(null);
     },
     onError: (error) => {
       showError(readErrorMessage(error, 'Failed to delete internship.'));
+      setInternshipToDelete(null);
     },
   });
 
@@ -117,10 +122,10 @@ export default function CompanyDashboardPage() {
                       <td className="px-4 py-3">{internship.location}</td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center rounded-full border bg-[#f5f7fa] px-2.5 py-0.5 text-xs font-semibold ${
+                          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                             internship.is_active
-                              ? 'border-[#478356] text-[#478356]'
-                              : 'border-gray-200 text-gray-500'
+                              ? 'border-[#478356] bg-[#eef6f0] text-[#478356]'
+                              : 'border-gray-200 bg-gray-50 text-gray-500'
                           }`}
                         >
                           {internship.is_active ? 'Active' : 'Inactive'}
@@ -140,16 +145,8 @@ export default function CompanyDashboardPage() {
                           <Button
                             variant="danger"
                             className="text-xs"
-                            isLoading={deleteMutation.isPending}
                             disabled={isPendingApproval}
-                            onClick={() => {
-                              const confirmed = window.confirm(
-                                `Delete ${internship.title}? This cannot be undone.`,
-                              );
-                              if (confirmed) {
-                                deleteMutation.mutate(internship.id);
-                              }
-                            }}
+                            onClick={() => setInternshipToDelete(internship)}
                           >
                             Delete
                           </Button>
@@ -162,6 +159,32 @@ export default function CompanyDashboardPage() {
             </Card>
           </>
         )}
+        
+        <Modal
+          isOpen={!!internshipToDelete}
+          onClose={() => setInternshipToDelete(null)}
+          title="Delete Internship"
+          variant="danger"
+          footer={
+            <>
+              <Button variant="secondary" onClick={() => setInternshipToDelete(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                isLoading={deleteMutation.isPending}
+                onClick={() => internshipToDelete && deleteMutation.mutate(internshipToDelete.id)}
+              >
+                Delete Internship
+              </Button>
+            </>
+          }
+        >
+          <p>
+            Are you sure you want to delete the internship{' '}
+            <span className="font-semibold text-gray-900">{internshipToDelete?.title}</span>? This action cannot be undone.
+          </p>
+        </Modal>
       </div>
     </AuthGuard>
   );

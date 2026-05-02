@@ -9,6 +9,7 @@ from analytics.analytics_schema import (
 from core.database import get_db
 from core.security import require_roles
 from models.user_model import User, UserRole
+from pydantic import BaseModel
 from repositories.analytics_repository import AnalyticsRepository
 from repositories.internship_repository import InternshipRepository
 from repositories.user_repository import UserRepository
@@ -101,6 +102,26 @@ def approve_user(
     except CompanyNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except CompanyApprovalError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    return UserResponse.model_validate(user)
+
+
+class UserStatusUpdate(BaseModel):
+    is_active: bool
+
+@router.patch("/users/{user_id}/status", response_model=UserResponse)
+def update_user_status(
+    user_id: int,
+    payload: UserStatusUpdate,
+    service: AdminService = Depends(get_admin_service),
+    _: User = Depends(require_roles(UserRole.admin)),
+) -> UserResponse:
+    try:
+        user = service.set_user_status(user_id, payload.is_active)
+    except UserNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AdminDeleteError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     return UserResponse.model_validate(user)

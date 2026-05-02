@@ -13,6 +13,12 @@ export type UserProfile = {
   branch: string | null;
   graduation_year: number | null;
   skills: string[];
+  resume_url?: string | null;
+  company_description?: string | null;
+  website?: string | null;
+  industry?: string | null;
+  company_size?: string | null;
+  established_year?: number | null;
   created_at: string;
 };
 
@@ -25,13 +31,15 @@ export type UpdateProfilePayload = {
   branch?: string | null;
   graduation_year?: number | null;
   skills?: string[];
+  company_description?: string | null;
+  website?: string | null;
+  industry?: string | null;
+  company_size?: string | null;
+  established_year?: number | null;
 };
 
 export type ResumeUploadResponse = {
-  filename: string;
-  content_type: string;
-  size_bytes: number;
-  uploaded_at: string;
+  resume_url: string;
 };
 
 const userService = {

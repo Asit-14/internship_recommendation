@@ -45,6 +45,14 @@ class UserProfileResponse(BaseModel):
     branch: str | None = None
     graduation_year: int | None = None
     skills: list[str] = Field(default_factory=list)
+    resume_url: str | None = None
+    
+    # Company specific fields
+    company_description: str | None = None
+    website: str | None = None
+    industry: str | None = None
+    company_size: str | None = None
+    established_year: int | None = None
 
     created_at: datetime
 
@@ -60,6 +68,13 @@ class UserProfileUpdateRequest(BaseModel):
     branch: str | None = Field(default=None, max_length=120)
     graduation_year: int | None = Field(default=None, ge=1950, le=_MAX_GRADUATION_YEAR)
     skills: list[str] | None = None
+    
+    # Company specific fields
+    company_description: str | None = Field(default=None, max_length=1000)
+    website: str | None = Field(default=None, max_length=255)
+    industry: str | None = Field(default=None, max_length=120)
+    company_size: str | None = Field(default=None, max_length=50)
+    established_year: int | None = Field(default=None, ge=1800, le=_MAX_GRADUATION_YEAR)
 
     @field_validator("name")
     @classmethod
@@ -72,7 +87,10 @@ class UserProfileUpdateRequest(BaseModel):
             raise ValueError("Name must be at least 2 characters long")
         return normalized
 
-    @field_validator("location", "education", "college_name", "branch")
+    @field_validator(
+        "location", "education", "college_name", "branch",
+        "company_description", "website", "industry", "company_size"
+    )
     @classmethod
     def validate_optional_text_fields(cls, value: str | None) -> str | None:
         return _normalize_optional_text(value)
@@ -101,10 +119,7 @@ class UserProfileUpdateRequest(BaseModel):
 
 
 class ResumeUploadResponse(BaseModel):
-    filename: str
-    content_type: str
-    size_bytes: int
-    uploaded_at: datetime
+    resume_url: str
 
 
 class DeleteAccountRequest(BaseModel):

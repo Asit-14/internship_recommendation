@@ -87,24 +87,6 @@ const applicationService = {
     });
     return response.data;
   },
-
-  downloadResume: async (applicationId: number): Promise<{ blob: Blob; filename: string }> => {
-    const response = await api.get<Blob>(`/applications/${applicationId}/resume`, {
-      responseType: 'blob',
-    });
-
-    const contentDisposition = response.headers['content-disposition'] as string | undefined;
-    let filename = `resume_${applicationId}`;
-
-    if (contentDisposition) {
-      const match = /filename="?([^";]+)"?/i.exec(contentDisposition);
-      if (match?.[1]) {
-        filename = match[1];
-      }
-    }
-
-    return { blob: response.data, filename };
-  },
 };
 
 export default applicationService;

@@ -62,6 +62,19 @@ class AdminService:
 
         self.user_repository.delete(user)
 
+    def set_user_status(self, user_id: int, is_active: bool) -> User:
+        user = self.user_repository.get_by_id(user_id)
+        if user is None:
+            raise UserNotFoundError("User not found")
+            
+        if user.role == UserRole.admin:
+            raise AdminDeleteError("Cannot change admin status")
+            
+        user.is_active = is_active
+        self.user_repository.db.commit()
+        self.user_repository.db.refresh(user)
+        return user
+
     def get_company_detail(self, company_id: int) -> tuple[User, list[Internship]]:
         user = self.user_repository.get_by_id(company_id)
         if user is None:

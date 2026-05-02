@@ -51,20 +51,8 @@ export default function DashboardPage() {
     enabled: role === 'student',
   });
 
-  const handleDownloadCertificate = async (certificateId: number) => {
-    try {
-      const { blob, filename } = await certificateService.download(certificateId);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      showError('Failed to download certificate');
-    }
+  const handleDownloadCertificate = (certificateUrl: string) => {
+    window.open(certificateUrl, '_blank', 'noopener,noreferrer');
   };
 
   const displayName = profileQuery.data?.name || 'Student';
@@ -143,7 +131,7 @@ export default function DashboardPage() {
                         {app.status === 'COMPLETED' && (
                           certificate ? (
                             <button
-                              onClick={() => handleDownloadCertificate(certificate.id)}
+                              onClick={() => handleDownloadCertificate(certificate.certificate_url)}
                               title="Download Certificate"
                               className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
                             >
@@ -229,7 +217,7 @@ export default function DashboardPage() {
                     <Button 
                       variant="secondary" 
                       className="mt-4 text-xs h-8"
-                      onClick={() => handleDownloadCertificate(cert.id)}
+                      onClick={() => handleDownloadCertificate(cert.certificate_url)}
                     >
                       Download PDF
                     </Button>

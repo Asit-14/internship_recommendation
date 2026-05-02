@@ -18,10 +18,6 @@ export default function RegisterPage() {
     router.replace(fallbackPath);
   }, [isAuthenticated, role, router]);
 
-  const handleRegisterSuccess = () => {
-    router.replace('/login?registered=1');
-  };
-
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center py-10">
       <div className="w-full max-w-[400px]">
@@ -38,7 +34,7 @@ export default function RegisterPage() {
 
         {/* The Form is usually wrapped in a Card inside RegisterForm component, 
             if not, wrap <RegisterForm /> in a <Card className="p-6"> */}
-        <RegisterForm onSuccess={handleRegisterSuccess} />
+        <RegisterForm />
 
         {/* Action Links Section */}
         <div className="mt-6 space-y-4">

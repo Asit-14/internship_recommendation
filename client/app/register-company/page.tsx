@@ -19,10 +19,6 @@ export default function RegisterCompanyPage() {
     router.replace(fallbackPath);
   }, [isAuthenticated, role, router]);
 
-  const handleRegisterSuccess = () => {
-    router.replace('/login?registered=1');
-  };
-
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center py-10">
       <div className="w-full max-w-[420px]">
@@ -32,7 +28,7 @@ export default function RegisterCompanyPage() {
             Government of India
           </span>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#11486b]">
-            Employer Registration
+            Employer Company
           </h1>
           <p className="mx-auto mt-2 max-w-[320px] text-xs text-gray-500 leading-relaxed">
             Create an account to post internships.
@@ -44,7 +40,7 @@ export default function RegisterCompanyPage() {
 
         {/* Form Container */}
         <div className="space-y-6">
-          <RegisterForm mode="company" onSuccess={handleRegisterSuccess} />
+          <RegisterForm mode="company" />
 
           <div className="text-center">
             <p className="text-xs text-gray-500">

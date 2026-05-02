@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     smtp_password: str | None = Field(default=None, validation_alias="SMTP_PASSWORD")
     smtp_host: str = Field("smtp.gmail.com", validation_alias="SMTP_HOST")
     smtp_port: int = Field(587, validation_alias="SMTP_PORT")
+    
+    cloudinary_cloud_name: str | None = Field(default=None, validation_alias="CLOUD_NAME")
+    cloudinary_api_key: str | None = Field(default=None, validation_alias="API_KEY")
+    cloudinary_api_secret: str | None = Field(default=None, validation_alias="API_SECRET")
 
 
 @lru_cache()

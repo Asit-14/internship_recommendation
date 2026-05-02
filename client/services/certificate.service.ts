@@ -22,23 +22,7 @@ const certificateService = {
     return response.data;
   },
 
-  download: async (certificateId: number): Promise<{ blob: Blob; filename: string }> => {
-    const response = await api.get<Blob>(`/certificate/${certificateId}`, {
-      responseType: 'blob',
-    });
 
-    const contentDisposition = response.headers['content-disposition'] as string | undefined;
-    let filename = `certificate_${certificateId}.pdf`;
-
-    if (contentDisposition) {
-      const match = /filename="?([^";]+)"?/i.exec(contentDisposition);
-      if (match?.[1]) {
-        filename = match[1];
-      }
-    }
-
-    return { blob: response.data, filename };
-  },
 
   verify: async (certificateId: string): Promise<Certificate> => {
     const response = await api.get<Certificate>(`/certificate/verify/${certificateId}`);

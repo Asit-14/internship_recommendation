@@ -70,12 +70,8 @@ class ApplicationService:
         self.resume_dir = Path("uploads") / "resumes"
 
     def apply(self, payload: ApplicationCreateRequest, current_user: User) -> Application:
-        if not current_user.resume_filename:
+        if not current_user.resume_url:
             raise MissingResumeError("Please upload your resume before applying")
-
-        resume_path = self.resume_dir / current_user.resume_filename
-        if not resume_path.exists():
-            raise MissingResumeError("Uploaded resume not found. Please upload again.")
 
         if not self.application_repository.internship_exists(payload.internship_id):
             raise InternshipNotFoundError("Internship not found")
@@ -93,7 +89,7 @@ class ApplicationService:
             return self.application_repository.create(
                 user_id=current_user.id,
                 internship_id=payload.internship_id,
-                resume_url=current_user.resume_filename,
+                resume_url=current_user.resume_url,
             )
         except IntegrityError as exc:
             self.application_repository.db.rollback()
@@ -188,11 +184,11 @@ class ApplicationService:
 
         return self.application_repository.update_status(application, target_status)
 
-    def get_application_resume_path(
+    def get_application_resume_url(
         self,
         application_id: int,
         current_user: User,
-    ) -> Path:
+    ) -> str:
         result = self.application_repository.get_application_with_internship(application_id)
         if result is None:
             raise ApplicationNotFoundError("Application not found")
@@ -205,15 +201,11 @@ class ApplicationService:
         if current_user.role == UserRole.company and internship.created_by != current_user.id:
             raise ForbiddenApplicationAccessError("You cannot access this resume")
 
-        resume_key = application.resume_url
-        if not resume_key:
+        resume_url = application.resume_url
+        if not resume_url:
             raise ResumeNotFoundError("Resume not available for this application")
 
-        resume_path = self.resume_dir / resume_key
-        if not resume_path.exists():
-            raise ResumeNotFoundError("Resume file not found")
-
-        return resume_path
+        return resume_url
 
     def _get_application_or_raise(self, application_id: int) -> Application:
         application = self.application_repository.get_by_id(application_id)

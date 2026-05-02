@@ -7,6 +7,7 @@ export type AdminUser = {
   email: string;
   role: 'student' | 'company' | 'admin';
   is_verified: boolean;
+  is_active: boolean;
   created_at: string;
 };
 
@@ -50,6 +51,11 @@ const adminService = {
 
   deleteUser: async (userId: number): Promise<void> => {
     await api.delete(`/admin/users/${userId}`);
+  },
+
+  setUserStatus: async (userId: number, is_active: boolean): Promise<AdminUser> => {
+    const response = await api.patch<AdminUser>(`/admin/users/${userId}/status`, { is_active });
+    return response.data;
   },
 
   getCompanies: async (): Promise<AdminUser[]> => {

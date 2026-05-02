@@ -79,8 +79,8 @@ class UserRepository:
         self.db.refresh(user)
         return user
 
-    def set_resume_filename(self, user: User, *, resume_filename: str) -> User:
-        user.resume_filename = resume_filename
+    def set_resume_url(self, user: User, *, resume_url: str) -> User:
+        user.resume_url = resume_url
         self.db.commit()
         self.db.refresh(user)
         return user

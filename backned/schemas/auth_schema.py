@@ -70,6 +70,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: RoleEnum
     is_verified: bool
+    is_active: bool
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
