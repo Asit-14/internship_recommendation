@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     app_name: str = "FastAPI Auth Service"
     api_v1_prefix: str = "/api/v1"
     port: int = Field(8000, validation_alias="PORT")
+    frontend_url: str = Field("http://localhost:3000", validation_alias="FRONTEND_URL")
 
     database_url: str = Field(..., validation_alias="DATABASE_URL")
     jwt_secret_key: str = Field(..., validation_alias="JWT_SECRET_KEY", min_length=32)

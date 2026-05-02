@@ -57,6 +57,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://internship-recommendation-mu.vercel.app",
+        settings.frontend_url,
     ],
     allow_credentials=True,
     allow_methods=["*"],
