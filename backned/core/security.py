@@ -2,6 +2,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
+import hashlib
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -30,6 +31,15 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
         return bcrypt.checkpw(plain_password.encode("utf-8"), password_hash.encode("utf-8"))
     except ValueError:
         return False
+
+
+def hash_otp(otp: str) -> str:
+    # Simple SHA256 for OTP is much faster than bcrypt and sufficient for 5-min 6-digit codes
+    return hashlib.sha256(otp.encode("utf-8")).hexdigest()
+
+
+def verify_otp(plain_otp: str, otp_hash: str) -> bool:
+    return hashlib.sha256(plain_otp.encode("utf-8")).hexdigest() == otp_hash
 
 
 def create_access_token(

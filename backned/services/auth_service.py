@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from core.config import settings
-from core.security import create_access_token, hash_password, verify_password
+from core.security import create_access_token, hash_password, verify_password, hash_otp, verify_otp
 from models.user_model import User, UserRole
 from repositories.user_repository import UserRepository
 from schemas.auth_schema import (
@@ -123,18 +123,18 @@ class AuthService:
             user=UserResponse.model_validate(user),
         )
 
-    def send_otp(self, payload: SendOTPRequest) -> None:
+    def send_otp(self, payload: SendOTPRequest) -> str:
         normalized_email = payload.email.lower()
         user = self.user_repository.get_by_email(normalized_email)
         if user is None:
             raise UserNotFoundError("User with this email does not exist")
 
         otp = "".join([str(secrets.randbelow(10)) for _ in range(6)])
-        otp_hash = hash_password(otp)
+        otp_hash = hash_otp(otp)
         expiry = datetime.now(timezone.utc) + timedelta(minutes=5)
 
         self.user_repository.set_otp(user, otp_hash=otp_hash, expiry=expiry)
-        send_otp_email(normalized_email, otp)
+        return otp
 
     def verify_otp(self, payload: VerifyOTPRequest) -> None:
         normalized_email = payload.email.lower()
@@ -148,7 +148,7 @@ class AuthService:
         if datetime.now(timezone.utc) > user.otp_expiry:
             raise InvalidOTPError("OTP has expired")
 
-        if not verify_password(payload.otp, user.otp_hash):
+        if not verify_otp(payload.otp, user.otp_hash):
             raise InvalidOTPError("Invalid OTP")
 
     def reset_password(self, payload: ResetPasswordRequest) -> None:

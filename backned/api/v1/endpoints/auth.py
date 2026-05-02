@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from core.database import get_db
@@ -21,6 +21,7 @@ from services.auth_service import (
     UserAlreadyExistsError,
     UserNotFoundError,
 )
+from utils.email_utils import send_otp_email
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -70,9 +71,14 @@ def login(payload: LoginRequest, service: AuthService = Depends(get_auth_service
 
 
 @router.post("/send-otp", status_code=status.HTTP_200_OK)
-def send_otp(payload: SendOTPRequest, service: AuthService = Depends(get_auth_service)):
+def send_otp(
+    payload: SendOTPRequest,
+    background_tasks: BackgroundTasks,
+    service: AuthService = Depends(get_auth_service)
+):
     try:
-        service.send_otp(payload)
+        otp = service.send_otp(payload)
+        background_tasks.add_task(send_otp_email, payload.email, otp)
         return {"message": "OTP sent successfully"}
     except UserNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
