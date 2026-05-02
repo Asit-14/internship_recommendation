@@ -13,7 +13,7 @@ import Table from '@/components/ui/Table';
 import Modal from '@/components/ui/Modal';
 import adminService from '@/services/admin.service';
 import { showError, showSuccess } from '@/lib/toast';
-import { Internship } from '@/services/company.service';
+import { Internship } from '@/services/internship.service';
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof AxiosError) {
