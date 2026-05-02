@@ -10,7 +10,7 @@ type InputProps = {
   label?: ReactNode;
   value?: string;
   onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  type?: 'text' | 'email' | 'password' | 'select' | 'file';
+  type?: 'text' | 'email' | 'password' | 'select' | 'file' | 'url';
   placeholder?: string;
   options?: SelectOption[];
   required?: boolean;
