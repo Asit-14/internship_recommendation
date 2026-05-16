@@ -42,7 +42,7 @@ export default function RegisterPage() {
             <p className="text-[11px] text-gray-500">
               Are you a company?{' '}
               <Link href="/register-company" className="font-bold text-[#11486b] hover:underline">
-                Register as Employer
+                Register as company
               </Link>
             </p>
           </div>

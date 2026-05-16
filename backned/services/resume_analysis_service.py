@@ -5,9 +5,9 @@ from ai.explanation import (
 )
 from ai.resume_parser import parse_resume_file
 from ai.resume_scoring import (
+    build_required_experience_profile,
     build_resume_score_breakdown,
     calculate_experience_match_score,
-    extract_required_experience,
 )
 from ai.scoring import (
     calculate_education_match_score,
@@ -80,11 +80,11 @@ class ResumeAnalysisService:
                 internship.description,
             )
 
-            required_experience = extract_required_experience(
+            required_experience = build_required_experience_profile(
                 internship.title,
                 internship.description,
             )
-            experience_match = calculate_experience_match_score(
+            experience_match_score, experience_details = calculate_experience_match_score(
                 parsed_resume.experience,
                 required_experience,
             )
@@ -93,7 +93,8 @@ class ResumeAnalysisService:
                 skill_match=skill_match,
                 location_match=location_match,
                 education_match=education_match,
-                experience_match=experience_match,
+                experience_match=experience_match_score,
+                experience_details=experience_details,
             )
 
             matched_skills = identify_matched_skills(user_skills, internship.skills_required)

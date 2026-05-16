@@ -14,5 +14,6 @@ email-validator
 python-multipart
 reportlab
 pdfplumber
+pypdf>=4.0.0
 python-docx
 cloudinary

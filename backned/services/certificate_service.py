@@ -46,11 +46,15 @@ class CertificateService:
         generated_by: User,
     ) -> CertificateResponse:
         # Permission check: admin or company owner
-        application = self.certificate_repository.get_application_by_id(payload.application_id)
+        application = self.certificate_repository.get_application_by_id(
+            payload.application_id
+        )
         if application is None:
             raise CertificateNotFoundError("Application not found")
 
-        internship = self.certificate_repository.get_internship_by_id(application.internship_id)
+        internship = self.certificate_repository.get_internship_by_id(
+            application.internship_id
+        )
         if internship is None:
             raise CertificateNotFoundError("Internship not found")
 
@@ -65,7 +69,9 @@ class CertificateService:
                     "You can only generate your own certificate"
                 )
         elif generated_by.role != UserRole.admin:
-            raise CertificatePermissionDeniedError("Only admin, company, or the student themselves can generate certificates")
+            raise CertificatePermissionDeniedError(
+                "Only admin, company, or the student themselves can generate certificates"
+            )
         if application.status != ApplicationStatus.COMPLETED:
             raise CertificateValidationError(
                 "Certificate can only be generated after internship completion"
@@ -76,7 +82,9 @@ class CertificateService:
             internship_id=application.internship_id,
         )
         if existing is not None:
-            raise CertificateConflictError("Certificate already exists for this internship")
+            raise CertificateConflictError(
+                "Certificate already exists for this internship"
+            )
 
         user = self.certificate_repository.get_user_by_id(application.user_id)
         if user is None:
@@ -89,6 +97,7 @@ class CertificateService:
             user_name=user_name,
             internship_title=internship.title,
             duration_weeks=internship.duration,
+            skills_acquired=internship.skills_required,
             certificate_id=certificate_id,
             output_dir=self.certificates_dir,
         )
@@ -100,7 +109,7 @@ class CertificateService:
             cloud_name=settings.cloudinary_cloud_name,
             api_key=settings.cloudinary_api_key,
             api_secret=settings.cloudinary_api_secret,
-            secure=True
+            secure=True,
         )
 
         try:
@@ -108,7 +117,7 @@ class CertificateService:
                 str(file_path),
                 public_id=certificate_id,
                 folder="certificates",
-                resource_type="raw"
+                resource_type="raw",
             )
             certificate_url = upload_result.get("secure_url")
         except Exception as e:
@@ -140,16 +149,23 @@ class CertificateService:
         if certificate is None:
             raise CertificateNotFoundError("Certificate not found")
 
-        if current_user.role == UserRole.student and certificate.user_id != current_user.id:
-            raise CertificatePermissionDeniedError("You can only download your own certificate")
+        if (
+            current_user.role == UserRole.student
+            and certificate.user_id != current_user.id
+        ):
+            raise CertificatePermissionDeniedError(
+                "You can only download your own certificate"
+            )
 
         return certificate
 
     def get_certificate_by_id(self, certificate_id: str) -> CertificateResponse:
         certificate = self.certificate_repository.get_by_certificate_id(certificate_id)
         if certificate is None:
-            raise CertificateNotFoundError(f"Certificate with ID {certificate_id} not found")
-        
+            raise CertificateNotFoundError(
+                f"Certificate with ID {certificate_id} not found"
+            )
+
         return CertificateResponse.model_validate(certificate)
 
     def _generate_unique_certificate_id(self) -> str:
@@ -165,7 +181,7 @@ class CertificateService:
     def _format_user_name(user: User) -> str:
         if user.name and user.name.strip():
             return user.name.strip()
-            
+
         local_part = user.email.split("@", maxsplit=1)[0]
         spaced = local_part.replace(".", " ").replace("_", " ").replace("-", " ")
         pieces = [part.capitalize() for part in spaced.split() if part]
